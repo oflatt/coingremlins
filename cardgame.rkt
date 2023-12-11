@@ -37,35 +37,17 @@
 (dcard merchant     "merchant"      3  2  1 "+1 coin every day.\n+1 buy on day 3.")
 (dcard thief        "thief"         3  4  4 "+1 coin on day 2.")
 (dcard defender     "defender"      4  2  7 "When defending, earns one gold (even if it loses).")
-(dcard underdog     "underdog"      4  1  1 "Every day:\n    If owner has fewer cards than the other:\n        +1 coin.") ;; this card sucks
+;; card doesn't make sense anymore- usually everyone has same number of cards
 (dcard overdog      "overdog"       4  4  4 "Every day:\n    Has +1 health and attack for each card the owner has more than the other.")
 (dcard killer       "killer"        5  7  7 "")
-(dcard valhalla     "valhalla"      4  2  9 "Cannot defend. When this player attacks, if the attacker dies, this player earns 2 gold.")
 (dcard pepper "pepper"  2 1 1 "Worth 1 victory point.")
 (dcard pearl  "pearl"   4 1 1 "Worth 3 victory points.")
 
-
-;; twist cards
-(dcard swap "swap" 0 -1 -1 "At the start of day 1: swap all your cards with all your opponent's cards.")
-(dcard debt "debt" 0 -1 -1 "At the end of day 3: lose all your coins.")
-(dcard double "double" 0 -1 -1 "At the start of day 1: double all your coins.")
-(dcard battlefield "battlefield" 0 -1 -1 "At the start of day 1: do another attack phase.")
-(dcard predict "predict" 0 -1 -1 "As a buy, instead of buying a card:\n Spend the same amount to predict your opponent's buy. If you are correct, get the card and the opponent doesn't. If wrong, lose the money.")
 
 (define every-game
   `((2 ,stipend)
     (6 ,pepper)
     (10 ,pearl)))
-
-(displayln (format "number of cards in every game: ~a"
-              (apply + (map car every-game))))
-
-(define twists
-  `((1 ,swap)
-    (1 ,debt)
-    (1 ,double)
-    (1 ,battlefield)))
-
 
 (define base-game
   `((2 ,stone-wall)
@@ -81,6 +63,38 @@
     (2 ,overdog)
     (4 ,killer)
     #;(2 ,valhalla)))
+
+;; not in base game
+(dcard underdog     "underdog"      4  2  2 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin.")
+(dcard valhalla     "valhalla"      4  2  9 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold.")
+(dcard coin-gremlin "coin gremlin"  3  1  1 "Has +1 to hp and attack for each coin the owner has.")
+(dcard loan         "loan"          0  1  1 "On buy: +7 coins. Every day: -2 coin after the buy phase.")
+(dcard interest     "interest"      1  2  2 "Every day: +1 coin for every 3 coins the owner has.")
+
+(define booster1
+  `((2 ,coin-gremlin)
+    (2 ,valhalla)
+    (2 ,underdog)))
+
+
+;; twist cards
+(dcard swap "swap" 0 -1 -1 "At the start of day 1: swap all your cards with all your opponent's cards.")
+(dcard debt "debt" 0 -1 -1 "At the end of day 3: lose all your coins.")
+(dcard double "double" 0 -1 -1 "At the start of day 1: double all your coins.")
+(dcard battlefield "battlefield" 0 -1 -1 "At the start of day 1: do another attack phase.")
+(dcard predict "predict" 0 -1 -1 "As a buy, instead of buying a card:\n Spend the same amount to predict your opponent's buy. If you are correct, get the card and the opponent doesn't. If wrong, lose the money.")
+
+
+(displayln (format "number of cards in every game: ~a"
+              (apply + (map car every-game))))
+
+(define twists
+  `((1 ,swap)
+    (1 ,debt)
+    (1 ,double)
+    (1 ,battlefield)))
+
+
 
 (displayln (format "number of cards in base game (without twists): ~a"
                    (apply + (map car (append every-game base-game)))))
