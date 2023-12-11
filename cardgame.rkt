@@ -190,8 +190,10 @@
 (define (take-first n lst)
   (take lst (min n (length lst))))
 
-(define (make-grid picts)
-  (define num-columns 10)
+(define (drop-first n lst)
+  (drop lst (min n (length lst))))
+
+(define (make-grid picts #:num-columns [num-columns 10])
   (define num-rows (ceiling (/ (length picts) num-columns)))
 
   ;; split all picts into rows
@@ -281,6 +283,20 @@ end
      (- (length piles) 1)
      (- (length piles) 1)))
 
+(define (make-printable picts)
+  (define num-columns 4)
+  (define num-per-page (* num-columns 4))
+  (cond
+    [(empty? picts) empty]
+    [else
+     (define blank
+       (ghost (first picts)))
+     (define first-page (take-first num-per-page picts))
+     (define fill-in (make-list (- num-per-page (length first-page)) blank))
+     (define rest (drop-first num-per-page picts))
+     (cons (make-grid (append first-page fill-in) #:num-columns num-columns)
+           (make-printable rest))]))
+
 
 (define (setup)
   ;; delete the cards directory if it exists
@@ -291,7 +307,7 @@ end
   (make-directory cards-dir))
 
 
-(define (save-cards cardset output-file)
+(define (save-cards cardset output-name)
   (define all-picts
     (apply
      append
@@ -303,15 +319,22 @@ end
                          (define rendered (render-card card))
                          (send (pict->bitmap rendered) save-file output 'png)
                          rendered))))
-             
-  
-
   
   (define picts-appended
     (make-grid all-picts))
   
-  (define all (build-path cards-dir output-file))
-  (send (pict->bitmap picts-appended) save-file all 'png))
+  (define all (build-path cards-dir (string-append output-name ".png")))
+  (send (pict->bitmap picts-appended) save-file all 'png)
+
+  ;; make printable
+  (define picts-printable
+    (make-printable all-picts))
+  (for ([pict picts-printable]
+        [i (in-range (length picts-printable))])
+       (define output (build-path cards-dir (format "print~a~a.png" output-name i)))
+       (send (pict->bitmap pict) save-file output 'png))
+
+  )
 
 (define (make-game)
   ;; first, sort the cards by cost
@@ -338,8 +361,8 @@ end
 
   (send (pict->bitmap card-back) save-file (build-path cards-dir "back.png") 'png)
   
-  (save-cards cardset "basegame.png")
-  (save-cards booster1 "booster1.png"))
+  (save-cards cardset "basegame")
+  (save-cards booster1 "booster1"))
 
 
 (setup)
