@@ -27,9 +27,9 @@
 
 (dcard living-costs "living costs" 0 -1 -1 "Lose 5 coins at the end of day 3. \nEach player starts with one of these.") ;; deprecated
 
-(dcard stipend      "stipend"       0 -1 -1 "Day 1: +2 coin.\nEach player starts with one of these.")
-(dcard stone-wall   "stone wall"    1  1  2 "When killed, is returned to the shop. Cannot attack.")
-(dcard poison       "poison"        1  3  2 "+1 coin on day 3.")
+(dcard stipend      "stipend"       0 -1 -1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these.")
+(dcard stone-wall   "stone wall"    1  1  2 "Can defend twice per turn (if still living). Cannot attack.")
+(dcard poison       "poison"        2  3  2 "+1 coin on day 3.")
 (dcard farmer       "farmer"        1  1  2 "+1 coin on day 2 and 3.")
 (dcard bomb-spirit  "bomb spirit"   2  9  2 "Cannot attack.")
 (dcard earner       "buff farmer"   2  2  2 "+1 coin every day.")
