@@ -331,7 +331,7 @@ end
     (make-printable all-picts))
   (for ([pict picts-printable]
         [i (in-range (length picts-printable))])
-       (define output (build-path cards-dir (format "print~a~a.png" output-name i)))
+       (define output (build-path cards-dir (format "print~a-~a.png" output-name i)))
        (send (pict->bitmap pict) save-file output 'png))
 
   )
