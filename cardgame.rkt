@@ -70,11 +70,19 @@
 (dcard coin-gremlin "coin gremlin"  3  1  1 "Has +1 to hp and attack for each coin the owner has.")
 (dcard loan         "loan"          0  1  1 "On buy: +7 coins. Every day: -2 coin after the buy phase.")
 (dcard interest     "interest"      1  2  2 "Every day: +1 coin for every 3 coins the owner has.")
+(dcard white-flag   "white flag"    3  1  3 "Bid this card instead of coins. Gain all marbles opponent bid, and discard this card.")
+(dcard bunny        "bunny"         2  3  3 "3 turns after buying: gain another bunny.")
+(dcard moppet       "moppet"        4  4  2 "Cannot be blocked by cards with less than 4 attack.")
 
 (define booster1
   `((2 ,coin-gremlin)
     (2 ,valhalla)
-    (2 ,underdog)))
+    (2 ,underdog)
+    (2 ,loan)
+    (2 ,interest)
+    (2 ,white-flag)
+    (2 ,bunny)
+    (2 ,moppet)))
 
 
 ;; twist cards
@@ -273,36 +281,17 @@ end
      (- (length piles) 1)
      (- (length piles) 1)))
 
-(define (make-game cardset-unsorted)
-  ;; first, sort the cards by cost
-  (define cardset-sorted
-    (sort cardset-unsorted
-          (lambda (a b)
-            (< (card-cost (second a)) (card-cost (second b))))))
 
-  ;; add ones in every game
-  (define cardset
-    (append twists every-game cardset-sorted))
-
-  (define numbers
-    (append (list (length twists))
-            (map car every-game)
-            (map car cardset-sorted)))
-  
+(define (setup)
   ;; delete the cards directory if it exists
   (when (directory-exists? cards-dir)
-        (delete-directory/files cards-dir))
+      (delete-directory/files cards-dir))
 
   ;; make the cards directory
-  (make-directory cards-dir)
+  (make-directory cards-dir))
 
-  ;; save tabletop code
-  (define code-str (tabletop-code numbers))
-  (define code-file (build-path cards-dir "code.lua"))
-  (define output (open-output-file code-file))
-  (display code-str output)
-  (close-output-port output)
 
+(define (save-cards cardset output-file)
   (define all-picts
     (apply
      append
@@ -315,16 +304,45 @@ end
                          (send (pict->bitmap rendered) save-file output 'png)
                          rendered))))
              
-  (send (pict->bitmap card-back) save-file (build-path cards-dir "back.png") 'png)
+  
 
   
   (define picts-appended
     (make-grid all-picts))
   
-  (define all (build-path cards-dir "all.png"))
-  (send (pict->bitmap picts-appended) save-file all 'png)
-  )
+  (define all (build-path cards-dir output-file))
+  (send (pict->bitmap picts-appended) save-file all 'png))
 
-(make-game base-game)
+(define (make-game)
+  ;; first, sort the cards by cost
+  (define cardset-sorted
+    (sort base-game
+          (lambda (a b)
+            (< (card-cost (second a)) (card-cost (second b))))))
+
+  ;; add ones in every game
+  (define cardset
+    (append twists every-game cardset-sorted))
+
+  (define numbers
+    (append (list (length twists))
+            (map car every-game)
+            (map car cardset-sorted)))
+  
+  ;; save tabletop code
+  (define code-str (tabletop-code numbers))
+  (define code-file (build-path cards-dir "code.lua"))
+  (define output (open-output-file code-file))
+  (display code-str output)
+  (close-output-port output)
+
+  (send (pict->bitmap card-back) save-file (build-path cards-dir "back.png") 'png)
+  
+  (save-cards cardset "basegame.png")
+  (save-cards booster1 "booster1.png"))
+
+
+(setup)
+(make-game)
 
 
