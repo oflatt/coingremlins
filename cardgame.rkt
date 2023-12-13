@@ -7,7 +7,6 @@
 (require json)
 
 
-(define version "0.1.1")
 (struct card (name cost attack health description))
 
 (define width 822)
@@ -25,7 +24,6 @@
          (set! all-cards (cons name all-cards))))
 
 
-(dcard living-costs "living costs" 0 -1 -1 "Lose 5 coins at the end of day 3. \nEach player starts with one of these.") ;; deprecated
 
 (dcard stipend      "stipend"       0 -1 -1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these.")
 (dcard stone-wall   "stone wall"    1  1  2 "Can defend twice per turn (if still living). Cannot attack.")
@@ -33,12 +31,12 @@
 (dcard farmer       "farmer"        1  1  2 "+1 coin on day 2 and 3.")
 (dcard bomb-spirit  "bomb spirit"   2  9  2 "Cannot attack.")
 (dcard earner       "buff farmer"   2  2  2 "+1 coin every day.")
-(dcard glass        "glass"         3  1  1 "Earns 4 coins on day 3.")
+(dcard glass        "gem"           3  1  2 "Earns 4 coins on day 3.")
 (dcard merchant     "merchant"      3  2  1 "+1 coin every day.\n+1 buy on day 3.")
 (dcard thief        "thief"         3  4  4 "+1 coin on day 2.")
 (dcard defender     "defender"      4  2  7 "When defending, earns one gold (even if it loses).")
 ;; card doesn't make sense anymore- usually everyone has same number of cards
-(dcard overdog      "overdog"       4  4  4 "Every day:\n    Has +1 health and attack for each card the owner has more than the other.")
+(dcard spirit      "spirit"         3  2  2 "Before bidding: add 1 coin to this card (if possible).\n+1 health and +1 attack for each coin on this card.")
 (dcard killer       "killer"        5  7  7 "")
 (dcard pepper "pepper"  2 1 1 "Worth 1 victory point.")
 (dcard pearl  "pearl"   4 1 1 "Worth 3 victory points.")
@@ -46,11 +44,11 @@
 
 (define every-game
   `((2 ,stipend)
-    (6 ,pepper)
-    (10 ,pearl)))
+    (4 ,pepper)
+    (6 ,pearl)))
 
 (define base-game
-  `((2 ,stone-wall)
+  `((4 ,stone-wall)
     (2 ,bomb-spirit)
     (4 ,poison)
     (4 ,farmer)
@@ -60,7 +58,7 @@
     (2 ,thief)
     (2 ,defender)
     #;(2 ,underdog)
-    (2 ,overdog)
+    (2 ,spirit)
     (4 ,killer)
     #;(2 ,valhalla)))
 
@@ -111,12 +109,12 @@
 
 
 (define (bold-text str)
-  (text str (cons 'bold "Helvetica") 80))
+  (text str (cons 'bold "Helvetica") 60))
 
 (define (description-text str)
   (define newline-split (regexp-split #px"\n" str))
   (with-size
-   60
+   40
    (apply vl-append
           (for/list ([line newline-split])
                     (para line #:width (- width (* 2 padding)))))))
@@ -155,7 +153,7 @@
         (bold-text "-")
         (bold-num (card-health card))))
   (define sword-png (scale-to-height (bitmap "sword.png") (pict-height attack-num)))
-  (define heart-png (scale-to-height (bitmap "heart.png") (pict-height attack-num)))
+  (define shield-png (scale-to-height (bitmap "shield.png") (pict-height attack-num)))
   
 
   (define attack
@@ -163,7 +161,7 @@
      attack-num sword-png))
   (define health
     (ht-append
-     health-num heart-png))
+     health-num shield-png))
                  
 
   
