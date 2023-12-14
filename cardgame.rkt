@@ -6,8 +6,9 @@
          (only-in slideshow/text with-size))
 (require json)
 
-
-(struct card (name cost attack health description))
+;; A card has a name, cost, attack, defense, count, and description
+;; count is number of cards per player
+(struct card (name cost attack defense count description))
 
 (define width 822)
 (define height 1122)
@@ -19,92 +20,84 @@
 
 (define all-cards empty)
 
-(define-syntax-rule (dcard name sname cost attack health description)
-  (begin (define name (card sname cost attack health description))
+(define-syntax-rule (dcard name sname cost attack defense count description)
+  (begin (define name (card sname cost attack defense count description))
          (set! all-cards (cons name all-cards))))
 
 
 
-(dcard stipend      "stipend"       0 -1 -1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these.")
-(dcard stone-wall   "stone wall"    1  1  2 "Can defend twice per turn, even if killed.\nIf either attack kills it it dies.")
-(dcard poison       "poison"        2  3  2 "+1 coin on day 3.")
-(dcard farmer       "farmer"        1  1  2 "+1 coin on day 2 and 3.")
-(dcard bomb-spirit  "bomb spirit"   2  9  2 "Cannot attack.")
-(dcard earner       "buff farmer"   2  2  2 "+1 coin every day.")
-(dcard glass        "gem"           3  1  2 "Earns 4 coins on day 3.")
-(dcard merchant     "merchant"      3  2  1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3.")
-(dcard thief        "thief"         3  4  4 "+1 coin on day 2.")
-(dcard defender     "defender"      4  2  7 "When defending, earns one gold (even if it loses).")
-(dcard spirit       "spirit"        3  2  2 "Before bidding: optionally add 1 coin to this card.\n+1 health and +1 attack for each coin on this card.")
-(dcard killer       "killer"        5  7  7 "")
-(dcard pepper "pepper"  2 1 1 "Worth 1 victory point.")
-(dcard pearl  "pearl"   4 1 1 "Worth 3 victory points.")
+(dcard stipend      "stipend"       0 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these.")
+(dcard stone-wall   "stone wall"    1  1  2 2 "Can defend twice per turn, even if killed.\nIf either attack kills it it dies.")
+(dcard poison       "poison"        2  3  2 2 "+1 coin on day 3.")
+(dcard farmer       "farmer"        1  1  2 2 "+1 coin on day 2 and 3.")
+(dcard bomb-spirit  "bomb spirit"   2  9  2 1 "Cannot attack.")
+(dcard earner       "buff farmer"   2  2  2 2 "+1 coin every day.")
+(dcard glass        "gem"           3  1  2 1 "Earns 4 coins on day 3.")
+(dcard merchant     "merchant"      3  2  1 1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3.")
+(dcard thief        "thief"         3  4  4 1 "+1 coin on day 2.")
+(dcard defender     "defender"      4  2  7 1 "When defending, earns one gold (even if it loses).")
+(dcard spirit       "spirit"        3  2  2 1 "Before bidding: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card.")
+(dcard killer       "killer"        5  7  7 1 "")
+(dcard pepper "pepper"  2 1 1 2 "Worth 1 victory point.")
+(dcard pearl  "pearl"   4 1 1 3 "Worth 3 victory points.")
 
 
 (define every-game
-  `((2 ,stipend)
-    (4 ,pepper)
-    (6 ,pearl)))
+  (list
+   stipend
+   pepper
+   pearl))
 
 (define base-game
-  `((4 ,stone-wall)
-    (2 ,bomb-spirit)
-    (4 ,poison)
-    (4 ,farmer)
-    (4 ,earner)
-    (2 ,glass)
-    (4 ,merchant)
-    (2 ,thief)
-    (2 ,defender)
-    #;(2 ,underdog)
-    (2 ,spirit)
-    (4 ,killer)
-    #;(2 ,valhalla)))
+  (list
+    stone-wall
+    bomb-spirit
+    poison
+    farmer
+    earner
+    glass
+    merchant
+    thief
+    defender
+    spirit
+    killer))
 
 ;; not in base game
-(dcard underdog     "underdog"      4  2  2 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin.")
-(dcard valhalla     "valhalla"      4  2  9 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold.")
-(dcard coin-gremlin "coin gremlin"  3  1  1 "Has +1 to hp and attack for each coin the owner has.")
-(dcard loan         "loan"          0  1  1 "On buy: +7 coins. Every day: -2 coin after the buy phase.")
-(dcard interest     "interest"      1  2  2 "Every day: +1 coin for every 3 coins the owner has.")
-(dcard white-flag   "white flag"    3  1  3 "Bid this card instead of coins. Gain all marbles opponent bid, and discard this card.")
-(dcard bunny        "bunny"         2  3  3 "3rd income phase after bought:\nGain another bunny from shop if possible.")
-(dcard moppet       "moppet"        4  4  2 "Cannot be blocked by cards with less than 4 attack.")
+(dcard underdog     "underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin.")
+(dcard valhalla     "valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold.")
+(dcard coin-gremlin "coin gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has.")
+(dcard loan         "loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase.")
+(dcard interest     "interest"      1  2  2 1 "Every day: +1 coin for every 3 coins the owner has.")
+(dcard white-flag   "white flag"    3  1  3 1 "Bid this card instead of coins. Gain all marbles opponent bid, and discard this card.")
+(dcard bunny        "bunny"         2  3  3 1 "3rd income phase after bought:\nGain another bunny from shop if possible.")
+(dcard moppet       "moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack.")
 
 (define booster1
-  `((2 ,coin-gremlin)
-    (2 ,valhalla)
-    (2 ,underdog)
-    (2 ,loan)
-    (2 ,interest)
-    (2 ,white-flag)
-    (2 ,bunny)
-    (2 ,moppet)))
+  (list
+    coin-gremlin
+    valhalla
+    underdog
+    loan
+    interest
+    white-flag
+    bunny
+    moppet))
 
 
 ;; twist cards
-(dcard swap "swap" 0 -1 -1 "At the start of day 1: swap all your cards with all your opponent's cards.")
-(dcard debt "debt" 0 -1 -1 "At the end of day 3: lose all your coins.")
-(dcard double "double" 0 -1 -1 "At the start of day 1: double all your coins.")
-(dcard battlefield "battlefield" 0 -1 -1 "At the start of day 1: do another attack phase.")
-(dcard predict "predict" 0 -1 -1 "As a buy, instead of buying a card:\n Spend the same amount to predict your opponent's buy. If you are correct, get the card and the opponent doesn't. If wrong, lose the money.")
+(dcard swap "swap" 0 -1 -1 1 "At the start of day 1: swap all your cards with all your opponent's cards.")
+(dcard debt "debt" 0 -1 -1 1 "At the end of day 3: lose all your coins.")
+(dcard double "double" 0 -1 -1 1 "At the start of day 1: double all your coins.")
+(dcard battlefield "battlefield" 0 -1 -1 1 "At the start of day 1: do another attack phase.")
+(dcard predict "predict" 0 -1 -1 1 "As a buy, instead of buying a card:\n Spend the same amount to predict your opponent's buy. If you are correct, get the card and the opponent doesn't. If wrong, lose the money.")
 
-
-(displayln (format "number of cards in every game: ~a"
-              (apply + (map car every-game))))
 
 (define twists
-  `((1 ,swap)
-    (1 ,debt)
-    (1 ,double)
-    (1 ,battlefield)))
-
-
-
-(displayln (format "number of cards in base game (without twists): ~a"
-                   (apply + (map car (append every-game base-game)))))
-
-
+  (list
+    swap
+    debt
+    double
+    battlefield))
 
 
 (define (bold-text str)
@@ -147,10 +140,10 @@
     (if (equal? (card-attack card) -1)
         (bold-text "-")
         (bold-num (card-attack card))))
-  (define health-num
-    (if (equal? (card-health card) -1)
+  (define defense-num
+    (if (equal? (card-defense card) -1)
         (bold-text "-")
-        (bold-num (card-health card))))
+        (bold-num (card-defense card))))
   (define sword-png (scale-to-height (bitmap "sword.png") (pict-height attack-num)))
   (define shield-png (scale-to-height (bitmap "shield.png") (pict-height attack-num)))
   
@@ -158,9 +151,9 @@
   (define attack
     (ht-append
      attack-num sword-png))
-  (define health
+  (define defense
     (ht-append
-     health-num shield-png))
+     defense-num shield-png))
                  
 
   
@@ -174,8 +167,8 @@
      padding (- height (* 4 padding) (pict-height description))
      description
      (superimpose
-      (- width padding (pict-width health)) padding 
-      health
+      (- width padding (pict-width defense)) padding 
+      defense
       (superimpose
        padding padding
        attack
@@ -308,14 +301,12 @@ end
   (define all-picts
     (apply
      append
-     (for/list ([pair cardset])
-               (define num (first pair))
-               (define card (second pair))
-               (for/list ([i (in-range num)])
-                         (define output (build-path cards-dir (string-append (card-name card) ".png")))
-                         (define rendered (render-card card))
-                         (send (pict->bitmap rendered) save-file output 'png)
-                         rendered))))
+     (for/list ([card cardset])
+        (for/list ([i (in-range (card-count card))])
+            (define output (build-path cards-dir (string-append (card-name card) ".png")))
+            (define rendered (render-card card))
+            (send (pict->bitmap rendered) save-file output 'png)
+                  rendered))))
   
   (define picts-appended
     (make-grid all-picts))
@@ -330,7 +321,6 @@ end
         [i (in-range (length picts-printable))])
        (define output (build-path cards-dir (format "print~a-~a.png" output-name i)))
        (send (pict->bitmap pict) save-file output 'png))
-
   )
 
 (define (make-game)
@@ -338,7 +328,7 @@ end
   (define cardset-sorted
     (sort base-game
           (lambda (a b)
-            (< (card-cost (second a)) (card-cost (second b))))))
+            (< (card-cost a) (card-cost b)))))
 
   ;; add ones in every game
   (define cardset
@@ -346,8 +336,8 @@ end
 
   (define numbers
     (append (list (length twists))
-            (map car every-game)
-            (map car cardset-sorted)))
+            (map card-count every-game)
+            (map card-count cardset-sorted)))
   
   ;; save tabletop code
   (define code-str (tabletop-code numbers))
