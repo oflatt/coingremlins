@@ -26,17 +26,16 @@
 
 
 (dcard stipend      "stipend"       0 -1 -1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these.")
-(dcard stone-wall   "stone wall"    1  1  2 "Can defend twice per turn (if still living). Cannot attack.")
+(dcard stone-wall   "stone wall"    1  1  2 "Can defend twice per turn, even if killed.\nIf either attack kills it it dies.")
 (dcard poison       "poison"        2  3  2 "+1 coin on day 3.")
 (dcard farmer       "farmer"        1  1  2 "+1 coin on day 2 and 3.")
 (dcard bomb-spirit  "bomb spirit"   2  9  2 "Cannot attack.")
 (dcard earner       "buff farmer"   2  2  2 "+1 coin every day.")
 (dcard glass        "gem"           3  1  2 "Earns 4 coins on day 3.")
-(dcard merchant     "merchant"      3  2  1 "+1 coin every day.\n+1 buy on day 3.")
+(dcard merchant     "merchant"      3  2  1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3.")
 (dcard thief        "thief"         3  4  4 "+1 coin on day 2.")
 (dcard defender     "defender"      4  2  7 "When defending, earns one gold (even if it loses).")
-;; card doesn't make sense anymore- usually everyone has same number of cards
-(dcard spirit      "spirit"         3  2  2 "Before bidding: add 1 coin to this card (if possible).\n+1 health and +1 attack for each coin on this card.")
+(dcard spirit       "spirit"        3  2  2 "Before bidding: optionally add 1 coin to this card.\n+1 health and +1 attack for each coin on this card.")
 (dcard killer       "killer"        5  7  7 "")
 (dcard pepper "pepper"  2 1 1 "Worth 1 victory point.")
 (dcard pearl  "pearl"   4 1 1 "Worth 3 victory points.")
@@ -69,7 +68,7 @@
 (dcard loan         "loan"          0  1  1 "On buy: +7 coins. Every day: -2 coin after the buy phase.")
 (dcard interest     "interest"      1  2  2 "Every day: +1 coin for every 3 coins the owner has.")
 (dcard white-flag   "white flag"    3  1  3 "Bid this card instead of coins. Gain all marbles opponent bid, and discard this card.")
-(dcard bunny        "bunny"         2  3  3 "3 turns after buying: gain another bunny.")
+(dcard bunny        "bunny"         2  3  3 "3rd income phase after bought:\nGain another bunny from shop if possible.")
 (dcard moppet       "moppet"        4  4  2 "Cannot be blocked by cards with less than 4 attack.")
 
 (define booster1
