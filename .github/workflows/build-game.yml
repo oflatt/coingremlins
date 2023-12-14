@@ -15,5 +15,7 @@ jobs:
         with:
           version: "8.10"
       - uses: actions/checkout@master
-      - uses: coactions/setup-xvfb@v1
-      - run: racket cardgame.rkt
+      - name: "Run cardgame.rkt"
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: racket cardgame.rkt
