@@ -7,8 +7,13 @@
 (require json)
 
 ;; A card has a name, cost, attack, defense, count, and description
-;; count is number of cards per player
+;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
 (struct card (name cost attack defense count description))
+
+(define (card-count-4-players card)
+  (if (equal? (card-count card) 0)
+      1
+      (* 4 (card-count card))))
 
 (define width 822)
 (define height 1122)
@@ -85,16 +90,14 @@
 
 
 ;; twist cards
-(dcard swap "swap" 0 -1 -1 1 "At the start of day 1: swap all your cards with all your opponent's cards.")
-(dcard debt "debt" 0 -1 -1 1 "At the end of day 3: lose all your coins.")
-(dcard double "double" 0 -1 -1 1 "At the start of day 1: double all your coins.")
-(dcard battlefield "battlefield" 0 -1 -1 1 "At the start of day 1: do another attack phase.")
-(dcard predict "predict" 0 -1 -1 1 "As a buy, instead of buying a card:\n Spend the same amount to predict your opponent's buy. If you are correct, get the card and the opponent doesn't. If wrong, lose the money.")
+(dcard debt "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins.")
+(dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins.")
+(dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase.")
+(dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying.\nIf you are correct, get the card and the opponent doesn't.\nIf wrong, lose the money.")
 
 
 (define twists
   (list
-    swap
     debt
     double
     battlefield))
@@ -302,7 +305,7 @@ end
     (apply
      append
      (for/list ([card cardset])
-        (for/list ([i (in-range (card-count card))])
+        (for/list ([i (in-range (card-count-4-players card))])
             (define output (build-path cards-dir (string-append (card-name card) ".png")))
             (define rendered (render-card card))
             (send (pict->bitmap rendered) save-file output 'png)
@@ -336,8 +339,8 @@ end
 
   (define numbers
     (append (list (length twists))
-            (map card-count every-game)
-            (map card-count cardset-sorted)))
+            (map card-count-4-players every-game)
+            (map card-count-4-players cardset-sorted)))
   
   ;; save tabletop code
   (define code-str (tabletop-code numbers))
