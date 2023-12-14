@@ -25,9 +25,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           post_to_pr_definition: |
-          [
-            {
-              "message_file": "./cards/basegame.png",
-              "title": "My Test Execution"
-            }
-          ]
+            [
+              {
+                "message_file": "./cards/basegame.png",
+                "title": "My Test Execution"
+              }
+            ]
