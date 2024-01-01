@@ -54,6 +54,11 @@ typically last 10-20 minutes.
       (make-area player-area "Player 2 Area")))
   600)
 
+TODO add numbering to cards
+
+TODO add coin on day tracker on day 1
+
+
 Coin Gremlins has two kinds of play areas.
 First, there is the @bold{shop} area, which holds cards players can buy.
 Second, each player has a @bold{army} area,
@@ -121,7 +126,7 @@ For example, the @code{income} gives the player
 interest after the cards to its left and before
 those on its right.
 
-TODO example.
+TODO example
 
 @section{Attack Phase- Investing}
 
