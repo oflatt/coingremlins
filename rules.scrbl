@@ -27,12 +27,14 @@ typically last 10-20 minutes.
 
 @(define shop-area-cards
   (make-grid
-    (map render-card (append (cdr every-game) basegame-sorted))
+    (map render-card (append (cdr (cdr every-game)) basegame-sorted))
     #:num-columns 5
     #:spacing padding))
 
 @(define stipend-card
   (render-card stipend))
+@(define day-tracker-card
+  (render-card day-tracker))
 
 @(define d20 (scale-to-height (bitmap "d20.jpeg") 700))
 @(define player-area
@@ -44,7 +46,9 @@ typically last 10-20 minutes.
   (vc-append (* padding 2)
     (hc-append padding
       (make-area shop-area-cards "Shop Area")
-      (make-area (ghost stipend-card) "Discard Pile"))
+      (vc-append (* padding 2)
+        day-tracker-card
+        (make-area (ghost stipend-card) "Discard Pile")))
     (hc-append (* padding 2)  
       (make-area player-area "Player 1 Area")
       (make-area player-area "Player 2 Area")))
@@ -83,6 +87,8 @@ Coin Gremlins is played in rounds called @bold{days},
 each round corresponding to a day in a 3-day cycle.
 First day 1, then day 2, then day 3, 
 then back to day 1 again.
+The current day can be tracked by placing a
+coin on the @code{day tracker} card.
 
 Each round consists of 3 phases: the @bold{income phase}, the @bold{attack phase}, and the @bold{buy phase}.
 The income phase applies effects from each card
@@ -114,6 +120,8 @@ of their cards in order from left to right.
 For example, the @code{income} gives the player
 interest after the cards to its left and before
 those on its right.
+
+TODO example.
 
 @section{Attack Phase- Investing}
 

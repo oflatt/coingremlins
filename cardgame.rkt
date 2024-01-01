@@ -35,9 +35,10 @@
          (set! all-cards (cons name all-cards))))
 
 (define victory-tag 'victory)
+(define day-tracker-tag 'day-tracker)
 
 
-(dcard stipend      "stipend"       0 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
+(dcard stipend      "stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
 (dcard stone-wall   "stone wall"    1  1  2 2 "Day 1: +1 coin.\nCan defend twice per turn ( unless the first makes it feint)" '())
 (dcard poison       "poison"        2  3  2 2 "+1 coin on day 3." '())
 (dcard farmer       "farmer"        1  1  2 2 "+1 coin on day 2 and 3." '())
@@ -52,11 +53,13 @@
 (dcard interest     "interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
 (dcard pepper "pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
 (dcard pearl  "pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
+(dcard day-tracker  "day tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag))
 
 
 (define every-game
   (list
    stipend
+   day-tracker
    pepper
    pearl))
 
@@ -121,10 +124,13 @@
 (define (bold-text str)
   (text str (cons 'bold "Helvetica") 60))
 
-(define (description-text str)
+(define (large-description-text str)
+  (description-text str #:font-size 100))
+
+(define (description-text str #:font-size [font-size 50])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
-   50
+   font-size
    (apply vl-append
           (for/list ([line newline-split])
                     (para line #:width (- width (* 2 padding)))))))
@@ -152,6 +158,7 @@
 
 (define person-image (bitmap "person.png"))
 
+
 (define (render-card card)
   (define base
     (filled-rectangle width height
@@ -159,7 +166,10 @@
                   "light green"
                   "white")))
   (define name (bold-text (card-name card)))
-  (define cost-num (bold-num (card-cost card)))
+  (define cost-num
+   (if (equal? (card-cost card) -1)
+       (bold-text "-")
+       (bold-num (card-cost card))))
   (define count-num (bold-num (card-count card)))
   (define attack-num 
     (if (equal? (card-attack card) -1)
@@ -192,7 +202,10 @@
                   
 
   
-  (define description (description-text (card-description card)))
+  (define description
+    (if (has-tag card day-tracker-tag)
+        (large-description-text (card-description card))
+        (description-text (card-description card))))
 
   
   (superimpose
