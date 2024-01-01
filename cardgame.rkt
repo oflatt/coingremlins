@@ -6,6 +6,8 @@
          (only-in slideshow/text with-size))
 (require json)
 
+(provide (all-defined-out))
+
 ;; A card has a name, cost, attack, defense, count, and description
 ;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
 (struct card (name cost attack defense count description tags))
@@ -35,8 +37,8 @@
 (define victory-tag 'victory)
 
 
-(dcard stipend      "stipend"       0 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
-(dcard stone-wall   "stone wall"    1  1  2 2 "Can defend twice per turn, even if killed.\nIf either attack kills it it dies." '())
+(dcard stipend      "stipend"       0 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
+(dcard stone-wall   "stone wall"    1  1  2 2 "Day 1: +1 coin.\nCan defend twice per turn ( unless the first makes it feint)" '())
 (dcard poison       "poison"        2  3  2 2 "+1 coin on day 3." '())
 (dcard farmer       "farmer"        1  1  2 2 "+1 coin on day 2 and 3." '())
 (dcard bomb-spirit  "bomb spirit"   2  9  2 1 "Cannot attack." '())
@@ -44,9 +46,10 @@
 (dcard glass        "gem"           3  1  2 1 "Earns 4 coins on day 3." '())
 (dcard merchant     "merchant"      3  2  1 1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3." '())
 (dcard thief        "thief"         3  4  4 1 "+1 coin on day 2." '())
-(dcard defender     "defender"      4  2  7 1 "When defending, earns one gold (even if it loses)." '())
+(dcard armadillo     "armadillo"      4  2  7 1 "When defending, earns one gold (even if it loses)." '())
 (dcard spirit       "spirit"        3  2  2 1 "Before bidding: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card." '())
-(dcard killer       "killer"        5  7  7 1 "" '())
+(dcard brute        "brute"         5  7  7 1 "" '())
+(dcard interest     "interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
 (dcard pepper "pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
 (dcard pearl  "pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
 
@@ -64,21 +67,26 @@
     poison
     farmer
     earner
+    interest
     glass
     merchant
     thief
-    defender
+    armadillo
     spirit
-    killer))
+    brute))
+(define basegame-sorted
+    (sort base-game
+          (lambda (a b)
+            (< (card-cost a) (card-cost b)))))
 
 ;; not in base game
 (dcard underdog     "underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
 (dcard valhalla     "valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold." '())
 (dcard coin-gremlin "coin gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
 (dcard loan         "loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
-(dcard interest     "interest"      1  2  2 1 "Every day: +1 coin for every 3 coins the owner has." '())
-(dcard white-flag   "white flag"    3  1  3 1 "Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
-(dcard bunny        "bunny"         2  3  3 1 "3rd income phase after bought:\nGain another bunny from shop if possible." '())
+(dcard white-flag   "white flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
+(dcard bunny        "bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
+(dcard bunny-twin   "bunny twin"    2  3  3 1 "Cannot be bought." '())
 (dcard moppet       "moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
 
 (define booster1
@@ -87,7 +95,6 @@
     valhalla
     underdog
     loan
-    interest
     white-flag
     bunny
     moppet))
@@ -100,11 +107,16 @@
 (dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying.\nIf you are correct, get the card and the opponent doesn't.\nIf wrong, lose the money." '())
 
 
+;; Twists are disabled for now
 (define twists
-  (list
+  empty)
+  #;(list
     debt
     double
-    battlefield))
+    battlefield)
+
+(define (area-text str)
+  (text str (cons 'bold "Helvetica") 250))
 
 (define (bold-text str)
   (text str (cons 'bold "Helvetica") 60))
@@ -138,6 +150,8 @@
   (define scale-factor (/ height (pict-height pict)))
   (scale pict scale-factor))
 
+(define person-image (bitmap "person.png"))
+
 (define (render-card card)
   (define base
     (filled-rectangle width height
@@ -158,7 +172,7 @@
   (define sword-png (scale-to-height (bitmap "sword.png") (pict-height attack-num)))
   (define shield-png (scale-to-height (bitmap "shield.png") (pict-height attack-num)))
   (define coin-png (scale-to-height (bitmap "coin.png") (pict-height cost-num)))
-  (define person-png (scale-to-height (bitmap "person.png") (pict-height cost-num)))
+  (define person-png (scale-to-height person-image (pict-height cost-num)))
   
 
   (define attack
@@ -207,18 +221,18 @@
 (define (drop-first n lst)
   (drop lst (min n (length lst))))
 
-(define (make-grid picts #:num-columns [num-columns 10])
+(define (make-grid picts #:num-columns [num-columns 10] #:spacing [spacing 0])
   (define num-rows (ceiling (/ (length picts) num-columns)))
 
   ;; split all picts into rows
   (define rows
     (for/list ([row (in-range num-rows)])
       (define start (* row num-columns))
-      (apply ht-append
+      (apply ht-append spacing
              (take-first num-columns (list-tail picts start)))))
 
   (println (format "made grid with ~a cards all in ~a columns and ~a rows" (length picts) num-columns num-rows))
-  (apply vl-append
+  (apply vl-append spacing
          rows))
 
 
@@ -348,20 +362,14 @@ end
   )
 
 (define (make-game)
-  ;; first, sort the cards by cost
-  (define cardset-sorted
-    (sort base-game
-          (lambda (a b)
-            (< (card-cost a) (card-cost b)))))
-
   ;; add ones in every game
   (define cardset
-    (append twists every-game cardset-sorted))
+    (append twists every-game basegame-sorted))
 
   (define numbers
     (append (list (length twists))
             (map card-count-4-players every-game)
-            (map card-count-4-players cardset-sorted)))
+            (map card-count-4-players basegame-sorted)))
   
   ;; save tabletop code
   (define code-str (tabletop-code numbers))
@@ -376,7 +384,5 @@ end
   (save-cards booster1 "booster1"))
 
 
-(setup)
-(make-game)
 
 
