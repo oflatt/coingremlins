@@ -15,10 +15,10 @@ jobs:
         with:
           version: "8.10"
       - uses: actions/checkout@master
-      - name: "Run cardgame.rkt"
+      - name: "Run makefile"
         uses: coactions/setup-xvfb@v1
         with:
-          run: racket cardgame.rkt
+          run: make
 
       - uses: actions/upload-artifact@v4
         with:
