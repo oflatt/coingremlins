@@ -138,11 +138,7 @@ All players perform the income phase at the
 same time.
 However, each player must apply the effects
 of their cards in order from left to right.
-<<<<<<< HEAD
-For example, the @code{income} card gives the player
-=======
-For example, the @code{Income} gives the player
->>>>>>> bade6ed (capitolize card names)
+For example, the @code{Income} card gives the player
 interest after the cards to its left and before
 those on its right.
 
