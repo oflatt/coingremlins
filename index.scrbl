@@ -3,7 +3,7 @@
 @(require "cardgame.rkt")
 @(require pict racket/math)
 
-@title{Coin Gremlins Rules}
+@title[#:version ""]{Coin Gremlins Rules}
 
 Coin Gremlins is a game about buying cards,
 gaining wealth, and bluffing.
@@ -233,8 +233,8 @@ First, all players decide on a card to buy in secret.
 They place their d20s with the number showing the number
 of the card they want to buy.
 @bold{Simultaneously}, all players reveal their d20s.
-Each player pays the price of their chosen card and gains that card.
-Each player puts the gained card in their army area to the right of
+Each player pays the price of their chosen card and gains that card,
+placing it in their army area to the right of the
 cards already there.
 
 If at least one player still has a @bold{buy} left,
