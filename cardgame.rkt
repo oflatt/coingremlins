@@ -219,7 +219,7 @@
            (+ padding (pict-height cost))
            name base)))))))
 ;; cards folder relative to this script
-(define-runtime-path cards-dir "cards")
+(define-runtime-path cards-dir "docs")
 
 (define (take-first n lst)
   (take lst (min n (length lst))))
@@ -330,15 +330,6 @@ end
      (define rest (drop-first num-per-page picts))
      (cons (make-grid (append first-page fill-in) #:num-columns num-columns)
            (make-printable rest))]))
-
-
-(define (setup)
-  ;; delete the cards directory if it exists
-  (when (directory-exists? cards-dir)
-      (delete-directory/files cards-dir))
-
-  ;; make the cards directory
-  (make-directory cards-dir))
 
 
 (define (save-cards cardset output-name)

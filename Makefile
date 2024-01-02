@@ -3,7 +3,8 @@
 all: docs test
 
 docs:
-	mkdir -p ./docs
+  # delete old docs if exists
+	rm -rf ./docs
 	scribble --dest ./docs *.scrbl
 
 test:
