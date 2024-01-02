@@ -276,7 +276,7 @@ and are unable to eliminate each other.
 
 To make a physical copy of this game, you will need to:
 @itemlist[
-  @item{Print out TODO this pdf of the cards, and cut them out. It prints enough cards for 4 players.}
+  @item{Print out @link["basegame.pdf"]{this pdf} of the cards, and cut them out. It prints enough cards for 4 players.}
   @item{(optional) Sleeve the cards.}
   @item{Get some tokens to use as coins. I use a bunch of old bread clips.}
   @item{Get a d20 die per player.}
