@@ -15,19 +15,23 @@ typically last 10-20 minutes.
 
 @(define padding 200)
 
-@(define (make-area contents name)
+@(define (make-area contents name #:show-box? [show-box? #t])
+  (define rect
+   (rounded-rectangle
+       (+ (pict-width contents) padding padding)
+       (+ (pict-height contents) padding padding)
+       -0.05))
   (vl-append 40
     (area-text name)
     (superimpose padding padding
       contents
-      (rounded-rectangle
-       (+ (pict-width contents) padding padding)
-       (+ (pict-height contents) padding padding)
-       -0.05))))
+      (if show-box?
+          rect
+          (ghost rect)))))
 
 @(define shop-area-cards
   (make-grid
-    (map render-card (append (cdr (cdr every-game)) basegame-sorted))
+    (map render-card shop-base-game)
     #:num-columns 5
     #:spacing padding))
 
@@ -47,11 +51,11 @@ typically last 10-20 minutes.
     (hc-append padding
       (make-area shop-area-cards "Shop Area")
       (vc-append (* padding 2)
-        day-tracker-card
+        (make-area day-tracker-card "Day Tracker" #:show-box? #f)
         (make-area (ghost stipend-card) "Discard Pile")))
     (hc-append (* padding 2)  
-      (make-area player-area "Player 1 Area")
-      (make-area player-area "Player 2 Area")))
+      (make-area player-area "Player 1 Army Area")
+      (make-area player-area "Player 2 Army Area")))
   600)
 
 TODO add numbering to cards
@@ -79,7 +83,7 @@ that card is used per person.
 For example, in a 3-player game, there will be
 6 @code{stone wall} cards in the shop.
 
-Each card in the @bold{shop} area is also assigned a number 1-13.
+Each card in the @bold{shop} area is also assigned a number 1-@(number->string (length shop-base-game)).
 This number will be used to refer to the card
 when players buy it.
 Each player also starts the game with 1 coin
@@ -107,6 +111,12 @@ Coin gremlin cards have a @bold{cost} in the lower-left,
 a @bold{strength} in the upper-left, and a @bold{defense} in the upper-right.
 They also have a @bold{player count} in the lower-right, which
 decides how many of that card are used per player.
+Cards also have a description of their effect
+during the @bold{income phase}.
+Sometimes, cards have special effects during
+other phases, such as the @bold{attack phase}.
+In such cases, the description of the effect
+will explicitly state when it applies.
 
 
 Some things in this game are revealed @bold{simultaneously}.
@@ -128,7 +138,7 @@ those on its right.
 
 TODO example
 
-@section{Attack Phase- Investing}
+@section{Attack Phase: Investing}
 
 During the @bold{attack phase}, players pay money, @bold{investing} in their army
 for the opportunity to @bold{attack} the other players.
@@ -147,7 +157,7 @@ player A gets to attack the other players.
 In the case of a tie, no player gets to attack.
 
 
-@section{Attack Phase- Attacking}
+@section{Attack Phase: Attacking}
 
 The attacking player may attack with each of
 their cards once, in the order of their choosing.

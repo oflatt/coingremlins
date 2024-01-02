@@ -38,22 +38,22 @@
 (define day-tracker-tag 'day-tracker)
 
 
-(dcard stipend      "stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
-(dcard stone-wall   "stone wall"    1  1  2 2 "Day 1: +1 coin.\nCan defend twice per turn ( unless the first makes it feint)" '())
-(dcard poison       "poison"        2  3  2 2 "+1 coin on day 3." '())
-(dcard farmer       "farmer"        1  1  2 2 "+1 coin on day 2 and 3." '())
-(dcard bomb-spirit  "bomb spirit"   2  9  2 1 "Cannot attack." '())
-(dcard earner       "buff farmer"   2  2  2 2 "+1 coin every day." '())
-(dcard glass        "gem"           3  1  2 1 "Earns 4 coins on day 3." '())
-(dcard merchant     "merchant"      3  2  1 1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3." '())
-(dcard thief        "thief"         3  4  4 1 "+1 coin on day 2." '())
-(dcard armadillo     "armadillo"      4  2  7 1 "When defending, earns one gold (even if it loses)." '())
-(dcard spirit       "spirit"        3  2  2 1 "Before bidding: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card." '())
-(dcard brute        "brute"         5  7  7 1 "" '())
-(dcard interest     "interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
-(dcard pepper "pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
-(dcard pearl  "pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
-(dcard day-tracker  "day tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag))
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
+(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin.\nCan defend twice per turn ( unless the first makes it feint)" '())
+(dcard poison       "Poison"        2  3  2 2 "+1 coin on day 3." '())
+(dcard farmer       "Farmer"        1  1  2 2 "+1 coin on day 2 and 3." '())
+(dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack." '())
+(dcard earner       "Buff Farmer"   2  2  2 2 "+1 coin every day." '())
+(dcard glass        "Gem"           3  1  2 1 "Earns 4 coins on day 3." '())
+(dcard merchant     "Merchant"      3  2  1 1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3." '())
+(dcard thief        "Thief"         3  4  4 1 "+1 coin on day 2." '())
+(dcard armadillo     "Armadillo"      4  2  7 1 "When defending, earns one gold (even if it loses)." '())
+(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card." '())
+(dcard brute        "Brute"         5  7  7 1 "" '())
+(dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
+(dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
+(dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
+(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag))
 
 
 (define every-game
@@ -75,22 +75,23 @@
     merchant
     thief
     armadillo
-    spirit
     brute))
 (define basegame-sorted
     (sort base-game
           (lambda (a b)
             (< (card-cost a) (card-cost b)))))
+(define shop-base-game
+  (append (cdr (cdr every-game)) basegame-sorted))
 
 ;; not in base game
-(dcard underdog     "underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
-(dcard valhalla     "valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold." '())
-(dcard coin-gremlin "coin gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
-(dcard loan         "loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
-(dcard white-flag   "white flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
-(dcard bunny        "bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
-(dcard bunny-twin   "bunny twin"    2  3  3 1 "Cannot be bought." '())
-(dcard moppet       "moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
+(dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
+(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold." '())
+(dcard coin-gremlin "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
+(dcard loan         "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
+(dcard white-flag   "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
+(dcard bunny        "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
+(dcard bunny-twin   "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
+(dcard moppet       "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
 
 (define booster1
   (list
@@ -100,7 +101,8 @@
     loan
     white-flag
     bunny
-    moppet))
+    moppet
+    spirit))
 
 
 ;; twist cards
@@ -122,12 +124,12 @@
   (text str (cons 'bold "Helvetica") 250))
 
 (define (bold-text str)
-  (text str (cons 'bold "Helvetica") 60))
+  (text str (cons 'bold "Helvetica") 100))
 
 (define (large-description-text str)
   (description-text str #:font-size 100))
 
-(define (description-text str #:font-size [font-size 50])
+(define (description-text str #:font-size [font-size 80])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
    font-size
@@ -159,6 +161,15 @@
 (define person-image (bitmap "person.png"))
 
 
+(define (number-icon file num)
+  (define num-text
+   (if (equal? num -1)
+       (bold-text "-")
+       (bold-num num)))
+  (define scaled-picture
+    (scale-to-height (bitmap file) (pict-height num-text)))
+  (hc-append 20 num-text scaled-picture))
+
 (define (render-card card)
   (define base
     (filled-rectangle width height
@@ -166,39 +177,17 @@
                   "light green"
                   "white")))
   (define name (bold-text (card-name card)))
-  (define cost-num
-   (if (equal? (card-cost card) -1)
-       (bold-text "-")
-       (bold-num (card-cost card))))
-  (define count-num (bold-num (card-count card)))
-  (define attack-num 
-    (if (equal? (card-attack card) -1)
-        (bold-text "-")
-        (bold-num (card-attack card))))
-  (define defense-num
-    (if (equal? (card-defense card) -1)
-        (bold-text "-")
-        (bold-num (card-defense card))))
-  (define sword-png (scale-to-height (bitmap "sword.png") (pict-height attack-num)))
-  (define shield-png (scale-to-height (bitmap "shield.png") (pict-height attack-num)))
-  (define coin-png (scale-to-height (bitmap "coin.png") (pict-height cost-num)))
-  (define person-png (scale-to-height person-image (pict-height cost-num)))
   
-
   (define attack
-    (ht-append
-     attack-num sword-png))
+    (number-icon "sword.png" (card-attack card)))
   (define defense
-    (ht-append
-     defense-num shield-png))
+    (number-icon "shield.png" (card-defense card)))
   (define cost
-    (ht-append
-     cost-num coin-png))
+    (number-icon "coin.png" (card-cost card)))
   (define count
     (if (equal? (card-count card) 0)
         (blank 0 0)
-        (ht-append
-           count-num person-png)))
+        (number-icon "person.png" (card-count card))))
                   
 
   
@@ -216,15 +205,19 @@
         padding (- height (pict-height cost) padding)
         cost
         (superimpose
-        padding (- height (* 4 padding) (pict-height description))
-        description
+          padding (- height (* 5 padding) (pict-height description))
+          description
         (superimpose
-          (- width padding (pict-width defense)) padding 
+          (- width padding (pict-width defense))
+          padding
           defense
           (superimpose
-          padding padding
+          padding
+          padding
           attack
-          (superimpose 'center padding name base)))))))
+          (superimpose 'center
+           (+ padding (pict-height cost))
+           name base)))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "cards")
 
