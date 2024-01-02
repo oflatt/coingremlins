@@ -138,7 +138,7 @@ All players perform the income phase at the
 same time.
 However, each player must apply the effects
 of their cards in order from left to right.
-For example, the @code{income} gives the player
+For example, the @code{income} card gives the player
 interest after the cards to its left and before
 those on its right.
 
@@ -208,7 +208,7 @@ defending cards to feint.
 In the above example, the attacking player
 chose a @code{poison} card to attack with.
 The defending players chose a @code{poison} card,
-a @code{armadillo} card, and a @code{farmer} card respectively.
+an @code{armadillo} card, and a @code{farmer} card, respectively.
 As a result, the attacking @code{poison} card @bold{feints},
 because the defending @code{poison} card has a higher
 attack than the attacking @code{poison} card's defense.
@@ -233,8 +233,9 @@ First, all players decide on a card to buy in secret.
 They place their d20s with the number showing the number
 of the card they want to buy.
 @bold{Simultaneously}, all players reveal their d20s.
-The players pay the price of the card they chose and gain the card.
-They place the card in their army area, to the right of all their other cards.
+Each player pays the price of their chosen card and gains that card.
+Each player puts the gained card in their army area to the right of
+cards already there.
 
 If at least one player still has a @bold{buy} left,
 this process continues.
@@ -255,7 +256,7 @@ All three players would pay @(number->string (card-cost stone-wall)) coin, and t
 
 There are two ways to win the game.
 @itemlist[
-  @item{First, if only one player is left in the game they win.}
+  @item{First, if only one player is left in the game, they win.}
   @item{Second, the first player to reach 7 or more victory points instantly wins, as long as they also have more points than every other player.}
 ]
 
