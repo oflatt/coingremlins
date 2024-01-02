@@ -79,13 +79,13 @@ for cards that have @bold{feinted}.
 @(define person-small (scale-to-height person-image 20))
 
 The base game contains @(number->string (+ (length base-game) (length every-game))) types of cards.
-Each player starts with one @code{stipend} card.
+Each player starts with one @code{Stipend} card.
 The rest of the cards are placed on the table
 in the @bold{shop} area.
 Each card has a player count @person-small, which determines how many of
 that card is used per person.
 For example, in a 3-player game, there will be
-6 @code{stone wall} cards in the shop.
+6 @code{Stone Wall} cards in the shop.
 
 Each card in the @bold{shop} area is also assigned a number 1-@(number->string (length shop-base-game)).
 This number will be used to refer to the card
@@ -101,7 +101,7 @@ each round corresponding to a day in a 3-day cycle.
 First day 1, then day 2, then day 3, 
 then back to day 1 again.
 The current day can be tracked by placing a
-coin on the @code{day tracker} card.
+coin on the @code{Day Tracker} card.
 
 Each round consists of 3 phases: the @bold{income phase}, the @bold{attack phase}, and the @bold{buy phase}.
 The income phase applies effects from each card
@@ -138,7 +138,11 @@ All players perform the income phase at the
 same time.
 However, each player must apply the effects
 of their cards in order from left to right.
+<<<<<<< HEAD
 For example, the @code{income} card gives the player
+=======
+For example, the @code{Income} gives the player
+>>>>>>> bade6ed (capitolize card names)
 interest after the cards to its left and before
 those on its right.
 
@@ -206,16 +210,16 @@ defending cards to feint.
   400)
 
 In the above example, the attacking player
-chose a @code{poison} card to attack with.
-The defending players chose a @code{poison} card,
-an @code{armadillo} card, and a @code{farmer} card, respectively.
-As a result, the attacking @code{poison} card @bold{feints},
-because the defending @code{poison} card has a higher
-attack than the attacking @code{poison} card's defense.
-Also, the defending @code{poison} card and @code{farmer} card
+chose a @code{Poison} card to attack with.
+The defending players chose a @code{Poison} card,
+an @code{Armadillo} card, and a @code{Farmer} card, respectively.
+As a result, the attacking @code{Poison} card @bold{feints},
+because the defending @code{Poison} card has a higher
+attack than the attacking @code{Poison} card's defense.
+Also, the defending @code{Poison} card and @code{Farmer} card
 both @bold{feint}, since they have lower defense
-than the attacking @code{poison} card's attack.
-Finally, the defending @code{armadillo} card does not @bold{feint}.
+than the attacking @code{Poison} card's attack.
+Finally, the defending @code{Armadillo} card does not @bold{feint}.
 
 After a @bold{fight}, the tapped cards are placed back
 in the army area in the same order they were in before.
@@ -225,7 +229,7 @@ Any cards that @bold{feinted} are placed in the discard pile.
 
 During the buy phase, players may buy cards from the shop.
 Each player gets one free @bold{buy} per round.
-Cards, like the @code{merchant}, can give players more
+Cards, like the @code{Merchant}, can give players more
 @bold{buys} during the income phase.
 
 Players buy cards from the shop @bold{simultaneously}.
@@ -248,9 +252,9 @@ and there are not enough for all of them left in the shop.
 In this case, discard all remaining cards of that type in the shop.
 The players that chose that card still spend their money,
 @bold{but none of them get the card}.
-For example, there could be only two @code{stone wall} left
+For example, there could be only two @code{Stone Wall} left
 in the shop but three players have chosen to buy it.
-All three players would pay @(number->string (card-cost stone-wall)) coin, and the two @code{stone wall} cards in the shop would be discarded.
+All three players would pay @(number->string (card-cost stone-wall)) coin, and the two @code{Stone Wall} cards in the shop would be discarded.
 
 @section{Win Conditions}
 
