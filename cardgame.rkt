@@ -38,15 +38,15 @@
 
 
 (dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
-(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin.\nCan defend twice per turn (unless the first makes it feint)" '())
-(dcard poison       "Poison"        2  3  2 2 "+1 coin on day 3." '())
-(dcard farmer       "Farmer"        1  1  2 2 "+1 coin on day 2 and 3." '())
+(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
+(dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
+(dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
 (dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack." '())
-(dcard earner       "Buff Farmer"   2  2  2 2 "+1 coin every day." '())
-(dcard glass        "Gem"           3  1  2 1 "Earns 4 coins on day 3." '())
-(dcard merchant     "Merchant"      3  2  1 1 "+1 coin on day 1.\n+1 coin on day 2.\n+1 buy on day 3." '())
-(dcard thief        "Thief"         3  4  4 1 "+1 coin on day 2." '())
-(dcard armadillo     "Armadillo"      4  2  7 1 "When defending, earns one gold (even if it loses)." '())
+(dcard earner       "Buff Farmer"   2  2  2 2 "Every day: +1 coin" '())
+(dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coins" '())
+(dcard merchant     "Merchant"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
+(dcard thief        "Thief"         3  4  4 1 "Day 2: +1 coin" '())
+(dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)." '())
 (dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card." '())
 (dcard brute        "Brute"         5  7  7 1 "" '())
 (dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
@@ -84,7 +84,7 @@
 
 ;; not in base game
 (dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
-(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 gold." '())
+(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 coins." '())
 (dcard coin-gremlin "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
 (dcard loan         "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
 (dcard white-flag   "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
