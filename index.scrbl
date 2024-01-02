@@ -60,6 +60,10 @@ typically last 10-20 minutes.
 
 TODO add numbering to cards
 
+TODO add starting coin for each player
+
+TODO add pile of coins
+
 TODO add coin on day tracker on day 1
 
 
@@ -106,6 +110,8 @@ The attack phase allows one player to attack
 all other players.
 The buy phase allows players to buy new cards.
 These phases are explained in the following sections.
+
+@(scale-to-height (render-card poison) 400)
 
 Coin gremlin cards have a @bold{cost} in the lower-left,
 a @bold{strength} in the upper-left, and a @bold{defense} in the upper-right.
@@ -260,3 +266,13 @@ In that case, play continues until one has the most points (or until only one pl
 Ties are also possible, in the case that
 the players exhaust the supply of victory points
 and are unable to eliminate each other.
+
+@section{How To Make a Physical Copy}
+
+To make a physical copy of this game, you will need to:
+@itemlist[
+  @item{Print out TODO this pdf of the cards, and cut them out. It prints enough cards for 4 players.}
+  @item{(optional) Sleeve the cards.}
+  @item{Get some tokens to use as coins. I use a bunch of old bread clips.}
+  @item{Get a d20 die per player.}
+]

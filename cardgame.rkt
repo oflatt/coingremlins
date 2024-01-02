@@ -1,7 +1,6 @@
 #lang racket
 
-(require pict)
-(require racket/runtime-path)
+(require pict racket/draw racket/runtime-path)
 (require (only-in slideshow/base para)
          (only-in slideshow/text with-size))
 (require json)
@@ -317,6 +316,17 @@ end
      (- (length piles) 1)
      (- (length piles) 1)))
 
+(define (picts->pdf picts output-name)
+  (define pdf-dc (new pdf-dc% [width #f] [height #f] [use-paper-bbox #t]
+  [output output-name] [interactive #f]  [as-eps #f]))
+  (define-values (width height) (send pdf-dc get-size))
+  (send pdf-dc start-doc "test.pdf")
+  (for ([pict picts])
+      (send pdf-dc start-page)
+      (send pdf-dc draw-bitmap (pict->bitmap (scale-to-height pict height)) 0 0)
+      (send pdf-dc end-page))
+  (send pdf-dc end-doc))
+
 (define (make-printable picts)
   (define num-columns 4)
   (define num-per-page (* num-columns 4))
@@ -338,24 +348,18 @@ end
      append
      (for/list ([card cardset])
         (for/list ([i (in-range (card-count-4-players card))])
-            (define output (build-path cards-dir (string-append (card-name card) ".png")))
-            (define rendered (render-card card))
-            (send (pict->bitmap rendered) save-file output 'png)
-                  rendered))))
-  
+            (render-card card)))))
+
+  ;; make printable
+  (define picts-printable
+    (make-printable all-picts))
+  (picts->pdf picts-printable (build-path cards-dir (string-append output-name ".pdf")))
+
   (define picts-appended
     (make-grid all-picts))
   
   (define all (build-path cards-dir (string-append output-name ".png")))
   (send (pict->bitmap picts-appended) save-file all 'png)
-
-  ;; make printable
-  (define picts-printable
-    (make-printable all-picts))
-  (for ([pict picts-printable]
-        [i (in-range (length picts-printable))])
-       (define output (build-path cards-dir (format "print~a-~a.png" output-name i)))
-       (send (pict->bitmap pict) save-file output 'png))
   )
 
 (define (make-game)
