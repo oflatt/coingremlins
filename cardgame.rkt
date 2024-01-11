@@ -145,6 +145,9 @@
 (define (bold-text str)
   (text str (cons 'bold "Helvetica") 100))
 
+(define (coin-card-text str)
+  (text str (cons 'bold "Helvetica") 200))
+
 (define (large-description-text str)
   (description-text str #:font-size 100))
 
@@ -155,6 +158,8 @@
    (apply vl-append
           (for/list ([line newline-split])
                     (para line #:width (- width (* 2 padding)))))))
+
+
 
 (define (bold-num num)
   (bold-text (number->string num)))
@@ -226,7 +231,7 @@
 
 (define (render-coin-card card)
   (define base (draw-base card))
-  (define coin-text (bold-num (card-cost card)))
+  (define coin-text (coin-card-text (number->string (card-cost card))))
   (define coin-pict (scale-to-height (bitmap "coin.png") (pict-height coin-text)))
   (define coin
     (hc-append 20 coin-text coin-pict))
