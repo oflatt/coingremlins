@@ -15,6 +15,7 @@
 (define day-tracker-tag 'day-tracker)
 (define reference-tag 'reference)
 (define unbuyable-tag 'unbuyable)
+(define coin-card-tag 'coin-card)
 
 (define (reference-card input-card)
   (struct-copy card input-card
@@ -43,8 +44,13 @@
   (begin (define name (card sname cost attack defense count description tags))
          (set! all-cards (cons name all-cards))))
 
+(dcard zero-coins "" 0 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard one-coin ""   1 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard two-coins ""  2 0 0 1 "" (list coin-card-tag unbuyable-tag))
+(dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
+(dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '(unbuyable-tag))
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
@@ -64,6 +70,11 @@
 
 (define every-game
   (list
+   zero-coins
+   one-coin
+   two-coins
+   five-coins
+   ten-coins
    stipend
    day-tracker
    pepper
@@ -116,6 +127,8 @@
 (dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins." '())
 (dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase." '())
 (dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying.\nIf you are correct, get the card and the opponent doesn't.\nIf wrong, lose the money." '())
+
+
 
 
 ;; Twists are disabled for now
@@ -204,12 +217,31 @@
       (cond
       [(has-tag? card victory-tag)
         "light green"]
+      [(has-tag? card coin-card-tag)
+        "light yellow"]
       [(has-tag? card reference-tag)
         "light slate gray"]
       [else "light blue"])
       #:border-width border-width)))
 
+(define (render-coin-card card)
+  (define base (draw-base card))
+  (define coin-text (bold-num (card-cost card)))
+  (define coin-pict (scale-to-height (bitmap "coin.png") (pict-height coin-text)))
+  (define coin
+    (hc-append 20 coin-text coin-pict))
+
+  (superimpose 'center 'center coin base))
+
 (define (render-card card)
+  (cond
+    [(has-tag? card coin-card-tag)
+     (render-coin-card card)]
+    [else
+     (render-normal-card card)]))
+
+
+(define (render-normal-card card)
   (define base (draw-base card))
     
   (define name (bold-text (card-name card)))
@@ -363,7 +395,6 @@ end
   (define Card-height 3.5) ;; in inches
 
   (define scale-factor (/ (* Card-height num-columns) A4-height))
-  (println (format "scale factor is ~a" scale-factor))
   (define target-height (* paper-height scale-factor))
   (send pdf-dc start-doc "test.pdf")
   (for ([pict picts])
