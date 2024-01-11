@@ -11,12 +11,22 @@
 ;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
 (struct card (name cost attack defense count description tags))
 
-(define (card-count-4-players card)
-  (if (equal? (card-count card) 0)
-      1
-      (* 4 (card-count card))))
+(define victory-tag 'victory)
+(define day-tracker-tag 'day-tracker)
+(define reference-tag 'reference)
+(define unbuyable-tag 'unbuyable)
 
-(define (has-tag card tag)
+(define (reference-card input-card)
+  (struct-copy card input-card
+               [tags (cons reference-tag (card-tags input-card))]))
+
+(define (card-count-4-players card)
+  (cond
+    [(has-tag? card reference-tag) 4]
+    [(equal? (card-count card) 0) 1]
+    [else (* 4 (card-count card))]))
+
+(define (has-tag? card tag)
   (member tag (card-tags card)))
 
 (define width 822)
@@ -33,11 +43,8 @@
   (begin (define name (card sname cost attack defense count description tags))
          (set! all-cards (cons name all-cards))))
 
-(define victory-tag 'victory)
-(define day-tracker-tag 'day-tracker)
 
-
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '())
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." '(unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
@@ -52,7 +59,7 @@
 (dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
 (dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
 (dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
-(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag))
+(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag unbuyable-tag))
 
 
 (define every-game
@@ -160,38 +167,68 @@
 (define person-image (bitmap "person.png"))
 
 
-(define (number-icon file num)
+(define (number-icon file num source-card)
   (define num-text
    (if (equal? num -1)
        (bold-text "-")
        (bold-num num)))
   (define scaled-picture
     (scale-to-height (bitmap file) (pict-height num-text)))
-  (hc-append 20 num-text scaled-picture))
+  (if (has-tag? source-card day-tracker-tag)
+      (blank)
+      (hc-append 20 num-text scaled-picture)))
+
+
+(define transparent (make-object color% 0 0 0 0))
+(define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
+  (superimpose 0 0
+    (filled-rectangle width border-width  #:color border-color #:border-width 0)
+    (superimpose 0 0
+      (filled-rectangle border-width height #:color border-color #:border-width 0)
+      (superimpose (- width border-width) 0
+        (filled-rectangle border-width height #:color border-color #:border-width 0)
+        (superimpose 0 (- height border-width)
+          (filled-rectangle width border-width #:color border-color #:border-width 0)
+          (filled-rectangle width height
+      #:color color
+      #:border-width 0))))))
+
+(define (draw-base card)
+  (define border-width (/ width 30))
+  (define outline-width (/ width 100))
+  (superimpose 0 0
+    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-width)
+    (rect-with-border width height
+      #:color "white"
+      #:border-color
+      (cond
+      [(has-tag? card victory-tag)
+        "light green"]
+      [(has-tag? card reference-tag)
+        "light slate gray"]
+      [else "light blue"])
+      #:border-width border-width)))
 
 (define (render-card card)
-  (define base
-    (filled-rectangle width height
-      #:color (if (has-tag card victory-tag)
-                  "light green"
-                  "white")))
+  (define base (draw-base card))
+    
   (define name (bold-text (card-name card)))
   
   (define attack
-    (number-icon "sword.png" (card-attack card)))
+    (number-icon "sword.png" (card-attack card) card))
   (define defense
-    (number-icon "shield.png" (card-defense card)))
+    (number-icon "shield.png" (card-defense card) card))
   (define cost
-    (number-icon "coin.png" (card-cost card)))
+    (number-icon "coin.png" (card-cost card) card))
   (define count
     (if (equal? (card-count card) 0)
         (blank 0 0)
-        (number-icon "person.png" (card-count card))))
+        (number-icon "person.png" (card-count card) card)))
                   
 
   
   (define description
-    (if (has-tag card day-tracker-tag)
+    (if (has-tag? card day-tracker-tag)
         (large-description-text (card-description card))
         (description-text (card-description card))))
 
@@ -318,18 +355,26 @@ end
 
 (define (picts->pdf picts output-name)
   (define pdf-dc (new pdf-dc% [width #f] [height #f] [use-paper-bbox #t]
-  [output output-name] [interactive #f]  [as-eps #f]))
+                      [output output-name] [interactive #f]  [as-eps #f]))
   (define-values (width height) (send pdf-dc get-size))
+  (define paper-height 1000)
+  (define num-columns 3)
+  (define A4-height 11.7) ;; in inches
+  (define Card-height 3.5) ;; in inches
+
+  (define scale-factor (/ (* Card-height num-columns) A4-height))
+  (println (format "scale factor is ~a" scale-factor))
+  (define target-height (* paper-height scale-factor))
   (send pdf-dc start-doc "test.pdf")
   (for ([pict picts])
       (send pdf-dc start-page)
-      (send pdf-dc draw-bitmap (pict->bitmap (scale-to-height pict height)) 0 0)
+      (send pdf-dc draw-bitmap (pict->bitmap (scale-to-height pict target-height)) 0 0)
       (send pdf-dc end-page))
   (send pdf-dc end-doc))
 
 (define (make-printable picts)
-  (define num-columns 4)
-  (define num-per-page (* num-columns 4))
+  (define num-columns 3)
+  (define num-per-page (* num-columns 3))
   (cond
     [(empty? picts) empty]
     [else
@@ -364,8 +409,14 @@ end
 
 (define (make-game)
   ;; add ones in every game
-  (define cardset
+  (define without-reference
     (append twists every-game basegame-sorted))
+  (define cardset
+    (append without-reference
+            (for/list ([card without-reference]
+                       #:when (not (has-tag? card unbuyable-tag)))
+              (reference-card card))))
+  
 
   (define numbers
     (append (list (length twists))
