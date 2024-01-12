@@ -390,14 +390,21 @@ end
      (- (length piles) 1)
      (- (length piles) 1)))
 
+(define (current-ps-vmargin)
+  (define hmargin (box 0))
+  (define vmargin (box 0))
+  (send (current-ps-setup) get-margin hmargin vmargin)
+  (unbox vmargin))
+
 (define (picts->pdf picts output-name)
   (define pdf-dc (new pdf-dc% [width #f] [height #f] [use-paper-bbox #t]
                       [output output-name] [interactive #f]  [as-eps #f]))
-  (define-values (width height) (send pdf-dc get-size))
-  (define paper-height 1000)
+  (define-values (dc-width dc-height) (send pdf-dc get-size))
+  (define paper-height dc-height)
   (define num-columns 3)
   (define A4-height 11.7) ;; in inches
   (define Card-height 3.5) ;; in inches
+
 
   (define scale-factor (/ (* Card-height num-columns) A4-height))
   (define target-height (* paper-height scale-factor))
