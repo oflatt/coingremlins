@@ -50,7 +50,7 @@
 (dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +2 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
@@ -220,12 +220,12 @@
       #:color "white"
       #:border-color
       (cond
+      [(has-tag? card reference-tag)
+        "light slate gray"]
       [(has-tag? card victory-tag)
         "light green"]
       [(has-tag? card coin-card-tag)
         "light yellow"]
-      [(has-tag? card reference-tag)
-        "light slate gray"]
       [else "light blue"])
       #:border-width border-width)))
 
