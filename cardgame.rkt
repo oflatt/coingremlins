@@ -145,6 +145,9 @@
 (define (bold-text str)
   (text str (cons 'bold "Helvetica") 100))
 
+(define (bold-underline-text str)
+  (text str (cons 'italic (cons 'bold "Helvetica")) 100))
+
 (define (coin-card-text str)
   (text str (cons 'bold "Helvetica") 200))
 
@@ -226,7 +229,7 @@
         "light green"]
       [(has-tag? card coin-card-tag)
         "light yellow"]
-      [else "light blue"])
+      [else "royal blue"])
       #:border-width border-width)))
 
 (define (render-coin-card card)
@@ -235,8 +238,10 @@
   (define coin-pict (scale-to-height (bitmap "coin.png") (pict-height coin-text)))
   (define coin
     (hc-append 20 coin-text coin-pict))
+  (define coin-small (number-icon "coin.png" (card-cost card) card))
 
-  (superimpose 'center 'center coin base))
+  (superimpose padding padding coin-small
+    (superimpose 'center 'center coin base)))
 
 (define (render-card card)
   (cond
@@ -249,7 +254,10 @@
 (define (render-normal-card card)
   (define base (draw-base card))
     
-  (define name (bold-text (card-name card)))
+  (define name
+   (if (has-tag? card reference-tag)
+       (bold-underline-text (card-name card))
+       (bold-text (card-name card))))
   
   (define attack
     (number-icon "sword.png" (card-attack card) card))
