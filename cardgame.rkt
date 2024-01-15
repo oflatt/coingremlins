@@ -50,6 +50,7 @@
 (dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
+(dcard pass      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
 (dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
@@ -65,7 +66,7 @@
 (dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
 (dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
 (dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
-(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag unbuyable-tag))
+(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "\nDay 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
 
 
 (define every-game-shop-cards
@@ -84,7 +85,7 @@
       day-tracker)
     every-game-shop-cards))
 
-(define base-game
+(define base-game-cards
   (list
     stone-wall
     bomb-spirit
@@ -98,12 +99,23 @@
     armadillo
     brute))
 
-(define basegame-sorted
-    (sort base-game
+(define base-game-cards-sorted
+    (sort base-game-cards
           (lambda (a b)
             (< (card-cost a) (card-cost b)))))
+
+
 (define shop-base-game
-  (append every-game-shop-cards basegame-sorted))
+  (append every-game-shop-cards base-game-cards-sorted))
+
+(define base-game-all-without-reference
+    (append every-game base-game-cards-sorted))
+(define base-game-all
+  (append base-game-all-without-reference
+          (for/list ([card base-game-all-without-reference]
+                      #:when (not (has-tag? card unbuyable-tag)))
+            (reference-card card))
+          '(,pass)))
 
 ;; not in base game
 (dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
@@ -137,12 +149,11 @@
 
 
 ;; Twists are disabled for now
-(define twists
-  empty)
-  #;(list
+#;(define twists
+  (list
     debt
     double
-    battlefield)
+    battlefield))
 
 (define (area-text str)
   (text str (cons 'bold "Helvetica") 250))
@@ -237,16 +248,26 @@
       [else "royal blue"])
       #:border-width border-width)))
 
+(define (with-player-count card pict)
+  (define count (number-icon "person.png" (card-count card) card))
+  (superimpose
+    (- width padding (pict-width count))
+    (- height (pict-height count) padding)
+    count
+    pict))
+
 (define (render-coin-card card)
   (define base (draw-base card))
   (define coin-text (coin-card-text (number->string (card-cost card))))
   (define coin-pict (scale-to-height (bitmap "coin.png") (pict-height coin-text)))
+  (define person-pict (scale-to-height person-image (pict-height coin-text)))
   (define coin
     (hc-append 20 coin-text coin-pict))
   (define coin-small (number-icon "coin.png" (card-cost card) card))
 
-  (superimpose padding padding coin-small
-    (superimpose 'center 'center coin base)))
+  (with-player-count card
+    (superimpose padding padding coin-small
+      (superimpose 'center 'center coin base))))
 
 (define (render-card card)
   (cond
@@ -270,12 +291,6 @@
     (number-icon "shield.png" (card-defense card) card))
   (define cost
     (number-icon "coin.png" (card-cost card) card))
-  (define count
-    (if (equal? (card-count card) 0)
-        (blank 0 0)
-        (number-icon "person.png" (card-count card) card)))
-                  
-
   
   (define description
     (if (has-tag? card day-tracker-tag)
@@ -283,10 +298,7 @@
         (description-text (card-description card))))
 
   
-  (superimpose
-     (- width padding (pict-width count))
-     (- height (pict-height count) padding)
-     count
+  (with-player-count card
      (superimpose
         padding (- height (pict-height cost) padding)
         cost
@@ -464,20 +476,9 @@ end
   )
 
 (define (make-game)
-  ;; add ones in every game
-  (define without-reference
-    (append twists every-game basegame-sorted))
-  (define cardset
-    (append without-reference
-            (for/list ([card without-reference]
-                       #:when (not (has-tag? card unbuyable-tag)))
-              (reference-card card))))
-  
 
   (define numbers
-    (append (list (length twists))
-            (map card-count-4-players every-game)
-            (map card-count-4-players basegame-sorted)))
+    (map card-count-4-players base-game-all))
   
   ;; save tabletop code
   (define code-str (tabletop-code numbers))
@@ -488,7 +489,7 @@ end
 
   (send (pict->bitmap card-back) save-file (build-path cards-dir "back.png") 'png)
   
-  (save-cards cardset "basegame")
+  (save-cards base-game-all "basegame")
   (save-cards booster1 "booster1"))
 
 

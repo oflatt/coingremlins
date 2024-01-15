@@ -41,8 +41,15 @@ typically last 10-20 minutes.
   (render-card zero-coins))
 @(define pepper-reference-card (render-card (reference-card pepper)))
 
+@(define coin (scale-to-height (bitmap "coin.png") 300))
+
 @(define day-tracker-card
   (render-card day-tracker))
+@(define day-1-tracker-card
+  (superimpose 500 150
+    coin
+    day-tracker-card))
+
 @(define stack-offset (/ padding 6))
 @(define (make-stack picts)
   (match picts
@@ -55,7 +62,7 @@ typically last 10-20 minutes.
       pict)]))
 
 
-@(define coin (scale-to-height (bitmap "coin.png") 400))
+
 @(define player-area
   (vl-append padding
     (hc-append padding
@@ -75,8 +82,8 @@ typically last 10-20 minutes.
     [(zero? n) (blank)]
     [else
      (superimpose
-      (random 0 (* padding 10))
-      (random 0 (* padding 10))
+      (random 0 (* padding 5))
+      (random 0 (* padding 5))
       pict
       (make-pile pict (sub1 n)))]))
 
@@ -88,34 +95,39 @@ typically last 10-20 minutes.
     (hc-append padding
       (make-area shop-area-cards "Shop Area")
       (vc-append (* padding 2)
-        (make-area day-tracker-card "Day Tracker" #:show-box? #f)
+        (make-area day-1-tracker-card "Day Tracker" #:show-box? #f)
         (make-area (ghost stipend-card) "Discard Pile"))
       (make-area pile-of-coins "Coin Reserve"))
     (hc-append (* padding 2)  
       (make-area player-area "Player 1 Army Area")
       (make-area player-area "Player 2 Army Area")))
-  600)
+  800)
 
 
-TODO add starting coin for each player
+The picture above shows the initial setup
+for Coin Gremlins.
+The shop area stores cards players can buy.
+The day tracker card helps keep track of the
+current day (marked with a coin).
+The discard pile stores cards that have feinted.
+The coin reserve stores coins the players
+can earn during the @bold{income phase}.
 
-TODO add pile of coins
-
-TODO add coin on day tracker on day 1
-
-
-Coin Gremlins has two kinds of play areas.
-First, there is the @bold{shop} area, which holds cards players can buy.
-Second, each player has a @bold{army} area,
-which holds cards the player has bought.
-Each player keeps their army area in the
-order they bought the cards, from left to right.
-Finally, there is also a @bold{discard} pile
-for cards that have @bold{feinted}.
+Each player has their own
+@bold{army area}, which stores the cards they have bought.
+Players keeps these cards in the order
+they bought them, from left to right.
+Players start with one coin and one @code{Stipend} card.
+Each player has @bold{coin cards}, which they
+used to signal how much money they are spending
+during the @bold{attack phase}.
+They also have @bold{reference cards},
+used to signal what card they are buying
+during the @bold{buy phase}.
 
 @(define person-small (scale-to-height person-image 20))
 
-The base game contains @(number->string (+ (length base-game) (length every-game))) types of cards.
+The base game contains @(number->string (length shop-base-game)) types of cards in the shop.
 Each player starts with one @code{Stipend} card.
 The rest of the cards are placed on the table
 in the @bold{shop} area.
@@ -123,12 +135,6 @@ Each card has a player count @person-small, which determines how many of
 that card is used per person.
 For example, in a 3-player game, there will be
 6 @code{Stone Wall} cards in the shop.
-
-Each card in the @bold{shop} area is also assigned a number 1-@(number->string (length shop-base-game)).
-This number will be used to refer to the card
-when players buy it.
-Each player also starts the game with 1 coin
-and a d20 die.
 
 
 @section{General Rules}
@@ -162,11 +168,6 @@ In such cases, the description of the effect
 will explicitly state when it applies.
 
 
-Some things in this game are revealed @bold{simultaneously}.
-This means that all players, in secret, decide on what they are going to do.
-Simultaneously, all players reveal their decisions.
-
-
 @section{Income Phase}
 
 During the income phase, each player applies
@@ -185,17 +186,24 @@ TODO example
 
 During the @bold{attack phase}, players pay money, @bold{investing} in their army
 for the opportunity to @bold{attack} the other players.
-Each player secretly decides
-how much money they want to spend.
-They place that number face up on their d20,
-and keep the die hidden.
-@bold{Simultaneously}, all players reveal their
-d20s and pay the amount shown.
-All players must pay at least 1 coin.
+They do this by choosing, secretly, how much
+money they want to spend.
+First, players pick up all of their coin cards
+and hold them in their hand.
+Then each player picks at least one coin card
+from their hand and places them face down
+on the table.
+When all players have chosen their coin cards,
+they @bold{simultaneously} reveal them.
+Each player pays the sum of the number of
+coins on the coin cards they revealed.
+
 
 If one player paid more than all other players,
 they @bold{attack} the other players.
-For example, if player A paid 3 coins, player B paid 2 coins, and player C paid 2 coins,
+For example, if player A paid 3 coins,
+player B paid 2 coins,
+and player C paid 2 coins,
 player A gets to attack the other players.
 In the case of a tie, no player gets to attack.
 
@@ -262,23 +270,35 @@ Any cards that @bold{feinted} are placed in the discard pile.
 
 During the buy phase, players may buy cards from the shop.
 Each player gets one free @bold{buy} per round.
-Cards, like the @code{Merchant}, can give players more
+Cards, like the @code{Merchant} card, can give players more
 @bold{buys} during the income phase.
+All players buy from the shop simultaneously
+so that no player knows what the others
+are buying.
 
-Players buy cards from the shop @bold{simultaneously}.
-First, all players decide on a card to buy in secret.
-They place their d20s with the number showing the number
-of the card they want to buy.
-@bold{Simultaneously}, all players reveal their d20s.
+
+To do this, all players first pick up
+all their reference cards.
+Then, each player with a buy remaining
+choses one reference card
+and places it face down on the table.
+@bold{Simultaneously}, all players reveal their 
+choice.
 Each player pays the price of their chosen card and gains that card,
 placing it in their army area to the right of the
 cards already there.
 
+Note that if a player does not wish to buy a
+card, they can place the @code{Pass} reference card. However, the pass reference card
+still uses a @bold{buy}.
+
+
 If at least one player still has a @bold{buy} left,
 this process continues.
-Players that still have a @bold{buy} left @bold{simultaneously}
-choose another card to buy, and so on until all players
-run out of @bold{buys}.
+Only players that still have a @bold{buy} left
+pick another reference card.
+Once all players have run out of @bold{buys},
+the buy phase ends.
 
 Sometimes, multiple players choose the same card
 and there are not enough for all of them left in the shop.
@@ -312,5 +332,4 @@ To make a physical copy of this game, you will need to:
   @item{Print out @link["basegame.pdf"]{this pdf} of the cards, and cut them out. It prints enough cards for 4 players.}
   @item{(optional) Sleeve the cards.}
   @item{Get some tokens to use as coins. I use a bunch of old bread clips.}
-  @item{Get a d20 die per player.}
 ]
