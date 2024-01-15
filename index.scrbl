@@ -46,7 +46,7 @@ typically last 10-20 minutes.
 @(define day-tracker-card
   (render-card day-tracker))
 @(define day-1-tracker-card
-  (superimpose 500 150
+  (superimpose 350 75
     coin
     day-tracker-card))
 
@@ -330,6 +330,6 @@ and are unable to eliminate each other.
 To make a physical copy of this game, you will need to:
 @itemlist[
   @item{Print out @link["basegame.pdf"]{this pdf} of the cards, and cut them out. It prints enough cards for 4 players.}
-  @item{(optional) Sleeve the cards.}
+  @item{(optional) Sleeve the cards, reinforcing using other cards behind the printed cards.}
   @item{Get some tokens to use as coins. I use a bunch of old bread clips.}
 ]

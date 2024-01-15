@@ -50,7 +50,7 @@
 (dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard pass      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
+(dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
 (dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
@@ -66,7 +66,7 @@
 (dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
 (dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
 (dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
-(dcard day-tracker  "Day Tracker" -1 -1 -1 0 "\nDay 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
+(dcard day-tracker  "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
 
 
 (define every-game-shop-cards
@@ -115,7 +115,7 @@
           (for/list ([card base-game-all-without-reference]
                       #:when (not (has-tag? card unbuyable-tag)))
             (reference-card card))
-          '(,pass)))
+          (list pass-card)))
 
 ;; not in base game
 (dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
