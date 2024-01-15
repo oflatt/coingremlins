@@ -68,17 +68,21 @@
 (dcard day-tracker  "Day Tracker" -1 -1 -1 0 "Day 1\n\nDay 2\n\nDay 3\n" (list day-tracker-tag unbuyable-tag))
 
 
+(define every-game-shop-cards
+ (list pepper
+       pearl))
+
 (define every-game
-  (list
-   zero-coins
-   one-coin
-   two-coins
-   five-coins
-   ten-coins
-   stipend
-   day-tracker
-   pepper
-   pearl))
+  (append
+    (list
+      zero-coins
+      one-coin
+      two-coins
+      five-coins
+      ten-coins
+      stipend
+      day-tracker)
+    every-game-shop-cards))
 
 (define base-game
   (list
@@ -93,12 +97,13 @@
     thief
     armadillo
     brute))
+
 (define basegame-sorted
     (sort base-game
           (lambda (a b)
             (< (card-cost a) (card-cost b)))))
 (define shop-base-game
-  (append (cdr (cdr every-game)) basegame-sorted))
+  (append every-game-shop-cards basegame-sorted))
 
 ;; not in base game
 (dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())

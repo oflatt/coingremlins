@@ -1,13 +1,13 @@
 #lang scribble/manual
 
 @(require "cardgame.rkt")
-@(require pict racket/math)
+@(require pict racket/math racket/match racket/list)
 
 @title[#:version ""]{Coin Gremlins Rules}
 
 Coin Gremlins is a game about buying cards,
 gaining wealth, and bluffing.
-It can be played by 2 or more players and games
+It can be played by 2-4 players and games
 typically last 10-20 minutes.
 
 
@@ -37,14 +37,51 @@ typically last 10-20 minutes.
 
 @(define stipend-card
   (render-card stipend))
+@(define 0-coin-card
+  (render-card zero-coins))
+@(define pepper-reference-card (render-card (reference-card pepper)))
+
 @(define day-tracker-card
   (render-card day-tracker))
+@(define stack-offset (/ padding 6))
+@(define (make-stack picts)
+  (match picts
+    ['() (blank)]
+    [`(,pict) pict]
+    [`(,pict ,picts ...)
+     (superimpose
+      stack-offset stack-offset
+      (make-stack picts)
+      pict)]))
 
-@(define d20 (scale-to-height (bitmap "d20.jpeg") 700))
+
+@(define coin (scale-to-height (bitmap "coin.png") 400))
 @(define player-area
-  (hc-append padding
-   stipend-card
-   (ghost stipend-card) d20))
+  (vl-append padding
+    (hc-append padding
+     stipend-card
+     (ghost stipend-card)
+     (ghost stipend-card)
+     coin
+     (ghost stipend-card))
+    (hc-append padding
+     (make-area (make-stack (make-list 4 0-coin-card)) "Coin Cards" #:show-box? #f)
+     (make-area
+       (make-stack (make-list 4 pepper-reference-card))
+       "Reference Cards" #:show-box? #f))))
+
+@(define (make-pile pict n)
+  (cond
+    [(zero? n) (blank)]
+    [else
+     (superimpose
+      (random 0 (* padding 10))
+      (random 0 (* padding 10))
+      pict
+      (make-pile pict (sub1 n)))]))
+
+@(define pile-of-coins
+  (make-pile coin 80))
 
 @(scale-to-height
   (vc-append (* padding 2)
@@ -52,13 +89,13 @@ typically last 10-20 minutes.
       (make-area shop-area-cards "Shop Area")
       (vc-append (* padding 2)
         (make-area day-tracker-card "Day Tracker" #:show-box? #f)
-        (make-area (ghost stipend-card) "Discard Pile")))
+        (make-area (ghost stipend-card) "Discard Pile"))
+      (make-area pile-of-coins "Coin Reserve"))
     (hc-append (* padding 2)  
       (make-area player-area "Player 1 Army Area")
       (make-area player-area "Player 2 Army Area")))
   600)
 
-TODO add numbering to cards
 
 TODO add starting coin for each player
 
