@@ -69,7 +69,7 @@
 
 (dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
 (dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
-(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it feint)" '())
+(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
 (dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack." '())

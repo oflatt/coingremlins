@@ -112,7 +112,7 @@ for Coin Gremlins.
 The shop area stores cards players can buy.
 The day tracker card helps keep track of the
 current day (marked with a coin).
-The discard pile stores cards that have feinted.
+The discard pile stores cards that have fainted.
 The coin reserve stores coins the players
 can earn during the @bold{income phase}.
 
@@ -227,14 +227,14 @@ If a defending player has no untapped cards,
 The attacking card @bold{fights} the defending cards.
 
 
-During a @bold{fight}, the attacking player's card may @bold{feint}
-and some or all of the defending cards may @bold{feint}.
+During a @bold{fight}, the attacking player's card may @bold{faint}
+and some or all of the defending cards may @bold{faint}.
 If any defending card has a higher attack than the attacking card's defense,
-the attacking card feints.
+the attacking card faints.
 For any defending card, if the attacking card's attack is higher than
-the defending card's defense, the defending card feints.
-Note that, even if the attacking card feints, it still can cause
-defending cards to feint.
+the defending card's defense, the defending card faints.
+Note that, even if the attacking card faints, it still can cause
+defending cards to faint.
 
 
 @(define poison-card (render-card poison))
@@ -257,17 +257,17 @@ In the above example, the attacking player
 chose a @code{Poison} card to attack with.
 The defending players chose a @code{Poison} card,
 an @code{Armadillo} card, and a @code{Farmer} card, respectively.
-As a result, the attacking @code{Poison} card @bold{feints},
+As a result, the attacking @code{Poison} card @bold{faints},
 because the defending @code{Poison} card has a higher
 attack than the attacking @code{Poison} card's defense.
 Also, the defending @code{Poison} card and @code{Farmer} card
-both @bold{feint}, since they have lower defense
+both @bold{faint}, since they have lower defense
 than the attacking @code{Poison} card's attack.
-Finally, the defending @code{Armadillo} card does not @bold{feint}.
+Finally, the defending @code{Armadillo} card does not @bold{faint}.
 
 After a @bold{fight}, the tapped cards are placed back
 in the army area in the same order they were in before.
-Any cards that @bold{feinted} are placed in the discard pile.
+Any cards that @bold{fainted} are placed in the discard pile.
 
 @section{Buy Phase}
 
