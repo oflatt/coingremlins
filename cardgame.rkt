@@ -68,21 +68,21 @@
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
 (dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin.\nEach player starts with one of these." (list unbuyable-tag))
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
-(dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack." '())
+(dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack" '())
 (dcard earner       "Buff Farmer"   2  2  2 2 "Every day: +1 coin" '())
 (dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coin" '())
 (dcard merchant     "Merchant"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
 (dcard thief        "Thief"         3  4  4 1 "Day 2: +1 coin" '())
-(dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)." '())
-(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card.\n+1 defense and +1 attack for each coin on this card." '())
+(dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
+(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
 (dcard brute        "Brute"         5  7  7 1 "" '())
-(dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has." '())
-(dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point." (list victory-tag))
-(dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points." (list victory-tag))
+(dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has" '())
+(dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point" (list victory-tag))
+(dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
 (dcard day-tracker  "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
 
 
@@ -135,8 +135,8 @@
           (list pass-card)))
 
 ;; not in base game
-(dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin." '())
-(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend.\nWhen this player attacks, if the attacker dies, this player earns 2 coins." '())
+(dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" '())
+(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" '())
 (dcard coin-gremlin "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
 (dcard loan         "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
 (dcard white-flag   "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
@@ -157,10 +157,10 @@
 
 
 ;; twist cards
-(dcard debt "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins." '())
-(dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins." '())
-(dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase." '())
-(dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying.\nIf you are correct, get the card and the opponent doesn't.\nIf wrong, lose the money." '())
+(dcard debt "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins" '())
+(dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins" '())
+(dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase" '())
+(dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying\nIf you are correct, get the card and the opponent doesn't\nIf wrong, lose the money" '())
 
 
 
