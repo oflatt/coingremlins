@@ -438,7 +438,7 @@ end
   (send pdf-dc start-doc "test.pdf")
   (for ([pict picts])
       (send pdf-dc start-page)
-      (send pdf-dc draw-bitmap (pict->bitmap (scale-to-height pict target-height)) 0 0)
+      (draw-pict (scale-to-height pict target-height) pdf-dc 0 0)
       (send pdf-dc end-page))
   (send pdf-dc end-doc))
 
