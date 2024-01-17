@@ -9,17 +9,33 @@
 
 ;; A card has a name, cost, attack, defense, count, and description
 ;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
-(struct card (name cost attack defense count description tags))
+(struct card (name cost attack defense count description tags) #:transparent)
 
 (define victory-tag 'victory)
 (define day-tracker-tag 'day-tracker)
 (define reference-tag 'reference)
 (define unbuyable-tag 'unbuyable)
 (define coin-card-tag 'coin-card)
+(define player-1-tag 'player-1)
+(define player-2-tag 'player-2)
+(define player-3-tag 'player-3)
+(define player-4-tag 'player-4)
+
+
+(define (player-color card)
+  (cond
+    [(has-tag? card player-1-tag) "light blue"]
+    [(has-tag? card player-2-tag) "light green"]
+    [(has-tag? card player-3-tag) "light coral"]
+    [(has-tag? card player-4-tag) "light yellow"]
+    [else (error (format "card ~a has no player tag" card))]))
+
+(define (add-tag input-card tag)
+  (struct-copy card input-card
+               [tags (cons tag (card-tags input-card))]))
 
 (define (reference-card input-card)
-  (struct-copy card input-card
-               [tags (cons reference-tag (card-tags input-card))]))
+  (add-tag input-card reference-tag))
 
 (define (card-count-4-players card)
   (cond
@@ -233,19 +249,28 @@
 (define (draw-base card)
   (define border-width (/ width 30))
   (define outline-width (/ width 100))
-  (superimpose 0 0
-    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-width)
-    (rect-with-border width height
-      #:color "white"
-      #:border-color
-      (cond
+  (define border-color
+   (cond
       [(has-tag? card reference-tag)
         "light slate gray"]
       [(has-tag? card victory-tag)
         "light green"]
       [(has-tag? card coin-card-tag)
         "light yellow"]
-      [else "royal blue"])
+      [else "royal blue"]))
+  (define background-color
+   (cond
+     [(has-tag? card reference-tag)
+      (player-color card)]
+     [(has-tag? card coin-card-tag)
+      (player-color card)]
+     [else "white"]))
+
+  (superimpose 0 0
+    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-width)
+    (rect-with-border width height
+      #:color background-color
+      #:border-color border-color
       #:border-width border-width)))
 
 (define (with-player-count card pict)
@@ -455,13 +480,32 @@ end
            (make-printable rest))]))
 
 
+(define (with-player-tag card i)
+  (define per-player
+    (floor
+     (/ (card-count-4-players card)
+        4)))
+  (cond
+    [(zero? per-player)
+      card]
+    [(< i per-player)
+     (add-tag card player-1-tag)]
+    [(< i (* per-player 2))
+     (add-tag card player-2-tag)]
+    [(< i (* per-player 3))
+     (add-tag card player-3-tag)]
+    [(< i (* per-player 4))
+     (add-tag card player-4-tag)]
+    [else card]))
+
 (define (save-cards cardset output-name)
   (define all-picts
     (apply
      append
      (for/list ([card cardset])
         (for/list ([i (in-range (card-count-4-players card))])
-            (render-card card)))))
+            (render-card (with-player-tag card i))))))
+  (println (format "Game requires printing ~a cards" (length all-picts)))
 
   ;; make printable
   (define picts-printable
@@ -476,7 +520,6 @@ end
   )
 
 (define (make-game)
-
   (define numbers
     (map card-count-4-players base-game-all))
   

@@ -37,10 +37,6 @@ typically last 10-20 minutes.
 
 @(define stipend-card
   (render-card stipend))
-@(define 0-coin-card
-  (render-card zero-coins))
-@(define pepper-reference-card (render-card (reference-card pepper)))
-
 @(define coin (scale-to-height (bitmap "coin.png") 300))
 
 @(define day-tracker-card
@@ -63,7 +59,14 @@ typically last 10-20 minutes.
 
 
 
-@(define player-area
+@(define (player-area player-tag)
+  @(define 0-coin-card
+    (render-card
+     (add-tag zero-coins player-tag)))
+  @(define pepper-reference-card
+    (render-card
+      (add-tag (reference-card pepper) player-tag)))
+
   (vl-append padding
     (hc-append padding
      stipend-card
@@ -99,8 +102,8 @@ typically last 10-20 minutes.
         (make-area (ghost stipend-card) "Discard Pile"))
       (make-area pile-of-coins "Coin Reserve"))
     (hc-append (* padding 2)  
-      (make-area player-area "Player 1 Army Area")
-      (make-area player-area "Player 2 Army Area")))
+      (make-area (player-area player-1-tag) "Player 1 Army Area")
+      (make-area (player-area player-2-tag) "Player 2 Army Area")))
   800)
 
 
