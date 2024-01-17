@@ -1,7 +1,10 @@
 #lang racket
 
 (require pict racket/draw racket/runtime-path)
-(require (only-in slideshow/base para current-main-font)
+(require (only-in slideshow/base
+                  para
+                  current-main-font                  
+                  current-font-size)
          (only-in slideshow/text with-size))
 (require json)
 
@@ -177,8 +180,8 @@
 (define (area-text str)
   (text str (cons 'bold font-name) 250))
 
-(define (bold-text str)
-  (text str (cons 'bold font-name) 100))
+(define (bold-text str #:size [size 100])
+  (text str (cons 'bold font-name) size))
 
 (define (bold-underline-text str)
   (text str (cons 'bold font-name) 100))
@@ -203,8 +206,19 @@
                                      [(and (string? e)
                                            (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
                                       => (lambda (m)
-                                           (list (colorize (para #:fill? #f (cadr m)) "firebrick")
+                                           (list (colorize (bold-text (cadr m) #:size (current-font-size))
+                                                           "firebrick")
                                                  (caddr m)))]
+                                     [(and (string? e)
+                                           (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
+                                      => (lambda (m)
+                                           (define (highlight s)
+                                             (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
+                                           (list (list-ref m 1)
+                                                 (highlight (list-ref m 2))
+                                                 (highlight "victory")
+                                                 (highlight (list-ref m 3))
+                                                 (list-ref m 4)))]
                                      [else e]))
                                  (add-between strs (inset coin (* -0.2 (pict-height coin))))))
                           #:width (- width (* 2 padding))))))))
