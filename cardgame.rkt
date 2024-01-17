@@ -21,13 +21,14 @@
 (define player-3-tag 'player-3)
 (define player-4-tag 'player-4)
 
+(define player-yellow (make-object color% 250 248 117))
 
 (define (player-color card)
   (cond
     [(has-tag? card player-1-tag) "light blue"]
     [(has-tag? card player-2-tag) "light green"]
     [(has-tag? card player-3-tag) "light coral"]
-    [(has-tag? card player-4-tag) "light yellow"]
+    [(has-tag? card player-4-tag) player-yellow]
     [else (error (format "card ~a has no player tag" card))]))
 
 (define (add-tag input-card tag)
@@ -254,12 +255,12 @@
   (define border-color
    (cond
       [(has-tag? card reference-tag)
-        "light slate gray"]
+        "white"]
       [(has-tag? card victory-tag)
         "light green"]
       [(has-tag? card coin-card-tag)
         "light yellow"]
-      [else "royal blue"]))
+      [else "light blue"]))
   (define background-color
    (cond
      [(has-tag? card reference-tag)
