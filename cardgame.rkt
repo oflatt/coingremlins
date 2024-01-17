@@ -218,15 +218,17 @@
   (scale pict scale-factor))
 
 (define person-image (bitmap "person.png"))
+(define coin-image (bitmap "coin.png"))
+(define sword-image (bitmap "sword.png"))
+(define shield-image (bitmap "shield.png"))
 
-
-(define (number-icon file num source-card)
+(define (number-icon image num source-card)
   (define num-text
    (if (equal? num -1)
        (bold-text "-")
        (bold-num num)))
   (define scaled-picture
-    (scale-to-height (bitmap file) (pict-height num-text)))
+    (scale-to-height image (pict-height num-text)))
   (if (has-tag? source-card day-tracker-tag)
       (blank)
       (hc-append 20 num-text scaled-picture)))
@@ -274,7 +276,7 @@
       #:border-width border-width)))
 
 (define (with-player-count card pict)
-  (define count (number-icon "person.png" (card-count card) card))
+  (define count (number-icon person-image (card-count card) card))
   (superimpose
     (- width padding (pict-width count))
     (- height (pict-height count) padding)
@@ -284,11 +286,11 @@
 (define (render-coin-card card)
   (define base (draw-base card))
   (define coin-text (coin-card-text (number->string (card-cost card))))
-  (define coin-pict (scale-to-height (bitmap "coin.png") (pict-height coin-text)))
+  (define coin-pict (scale-to-height coin-image (pict-height coin-text)))
   (define person-pict (scale-to-height person-image (pict-height coin-text)))
   (define coin
     (hc-append 20 coin-text coin-pict))
-  (define coin-small (number-icon "coin.png" (card-cost card) card))
+  (define coin-small (number-icon coin-image (card-cost card) card))
 
   (with-player-count card
     (superimpose padding padding coin-small
@@ -311,11 +313,11 @@
        (bold-text (card-name card))))
   
   (define attack
-    (number-icon "sword.png" (card-attack card) card))
+    (number-icon sword-image (card-attack card) card))
   (define defense
-    (number-icon "shield.png" (card-defense card) card))
+    (number-icon shield-image (card-defense card) card))
   (define cost
-    (number-icon "coin.png" (card-cost card) card))
+    (number-icon coin-image (card-cost card) card))
   
   (define description
     (if (has-tag? card day-tracker-tag)
@@ -461,7 +463,7 @@ end
   (send pdf-dc start-doc "test.pdf")
   (for ([pict picts])
       (send pdf-dc start-page)
-      (send pdf-dc draw-bitmap (pict->bitmap (scale-to-height pict target-height)) 0 0)
+      (draw-pict (scale-to-height pict target-height) pdf-dc 0 0)
       (send pdf-dc end-page))
   (send pdf-dc end-doc))
 
@@ -516,8 +518,9 @@ end
     (make-grid all-picts))
   
   (define all (build-path cards-dir (string-append output-name ".png")))
+  #;
   (send (pict->bitmap picts-appended) save-file all 'png)
-  )
+  (void))
 
 (define (make-game)
   (define numbers
@@ -526,7 +529,7 @@ end
   ;; save tabletop code
   (define code-str (tabletop-code numbers))
   (define code-file (build-path cards-dir "code.lua"))
-  (define output (open-output-file code-file))
+  (define output (open-output-file code-file #:exists 'truncate))
   (display code-str output)
   (close-output-port output)
 
