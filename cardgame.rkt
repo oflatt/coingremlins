@@ -515,13 +515,15 @@ end
     (make-printable all-picts))
   (picts->pdf picts-printable (build-path cards-dir (string-append output-name ".pdf")))
 
+  (define all-picts-smaller
+    (map (lambda (pict)
+           (scale-to-height pict 400))
+         all-picts))
   (define picts-appended
-    (make-grid all-picts))
+    (make-grid all-picts-smaller))
   
   (define all (build-path cards-dir (string-append output-name ".png")))
-  #;
-  (send (pict->bitmap picts-appended) save-file all 'png)
-  (void))
+  (send (pict->bitmap picts-appended) save-file all 'png))
 
 (define (make-game)
   (define numbers
