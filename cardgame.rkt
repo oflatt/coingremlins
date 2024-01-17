@@ -515,9 +515,10 @@ end
     (make-printable all-picts))
   (picts->pdf picts-printable (build-path cards-dir (string-append output-name ".pdf")))
 
+  ;; make small to improve rendering time
   (define all-picts-smaller
     (map (lambda (pict)
-           (scale-to-height pict 400))
+           (scale-to-height pict 200))
          all-picts))
   (define picts-appended
     (make-grid all-picts-smaller))
