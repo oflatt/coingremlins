@@ -74,7 +74,7 @@
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
 (dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack." '())
 (dcard earner       "Buff Farmer"   2  2  2 2 "Every day: +1 coin" '())
-(dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coins" '())
+(dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coin" '())
 (dcard merchant     "Merchant"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
 (dcard thief        "Thief"         3  4  4 1 "Day 2: +1 coin" '())
 (dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)." '())
@@ -193,7 +193,18 @@
    font-size
    (apply vl-append
           (for/list ([line newline-split])
-                    (para line #:width (- width (* 2 padding)))))))
+                    (para (let ([strs (regexp-split #px" *coin( +|$)" line)])
+                            (define coin (scale coin-image 0.1) )
+                            (map (lambda (e)
+                                   (cond
+                                     [(and (string? e)
+                                           (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
+                                      => (lambda (m)
+                                           (list (colorize (para #:fill? #f (cadr m)) "firebrick")
+                                                 (caddr m)))]
+                                     [else e]))
+                                 (add-between strs (inset coin (* -0.2 (pict-height coin))))))
+                          #:width (- width (* 2 padding)))))))
 
 
 
