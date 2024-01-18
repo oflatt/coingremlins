@@ -1,7 +1,10 @@
 #lang racket
 
 (require pict racket/draw racket/runtime-path)
-(require (only-in slideshow/base para)
+(require (only-in slideshow/base
+                  para
+                  current-main-font                  
+                  current-font-size)
          (only-in slideshow/text with-size))
 (require json)
 
@@ -67,8 +70,8 @@
 (dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card." '(reference-tag unbuyable-tag))
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin.\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
+(dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
+(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these" (list unbuyable-tag))
 (dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
 (dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
 (dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
@@ -176,17 +179,19 @@
     double
     battlefield))
 
-(define (area-text str)
-  (text str (cons 'bold "Helvetica") 250))
+(define font-name '("PT Sans" . swiss))
 
-(define (bold-text str)
-  (text str (cons 'bold "Helvetica") 100))
+(define (area-text str)
+  (text str (cons 'bold font-name) 250))
+
+(define (bold-text str #:size [size 100])
+  (text str (cons 'bold font-name) size))
 
 (define (bold-underline-text str)
-  (text str (cons 'italic (cons 'bold "Helvetica")) 100))
+  (text str (cons 'bold font-name) 100))
 
 (define (coin-card-text str)
-  (text str (cons 'bold "Helvetica") 200))
+  (text str (cons 'bold font-name) 200))
 
 (define (large-description-text str)
   (description-text str #:font-size 100))
@@ -197,6 +202,7 @@
    font-size
    (apply vl-append
           (for/list ([line newline-split])
+            (parameterize ([current-main-font font-name])
                     (para (let ([strs (regexp-split #px" *coin( +|$)" line)])
                             (define coin (scale coin-image 0.1) )
                             (map (lambda (e)
@@ -204,11 +210,22 @@
                                      [(and (string? e)
                                            (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
                                       => (lambda (m)
-                                           (list (colorize (para #:fill? #f (cadr m)) "firebrick")
+                                           (list (colorize (bold-text (cadr m) #:size (current-font-size))
+                                                           "firebrick")
                                                  (caddr m)))]
+                                     [(and (string? e)
+                                           (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
+                                      => (lambda (m)
+                                           (define (highlight s)
+                                             (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
+                                           (list (list-ref m 1)
+                                                 (highlight (list-ref m 2))
+                                                 (highlight "victory")
+                                                 (highlight (list-ref m 3))
+                                                 (list-ref m 4)))]
                                      [else e]))
                                  (add-between strs (inset coin (* -0.2 (pict-height coin))))))
-                          #:width (- width (* 2 padding)))))))
+                          #:width (- width (* 2 padding))))))))
 
 
 
