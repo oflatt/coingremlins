@@ -70,23 +70,30 @@
 (dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
 (dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these" (list unbuyable-tag))
-(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
-(dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
-(dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
+(dcard pass-card    "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
+(dcard stipend      "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
+(dcard stone-wall   "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
+(dcard poison       "Annoyed Ghost"        2  3  2 2 "Day 3: +1 coin" '())
+(dcard farmer       "Undead Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
 (dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack" '())
-(dcard buff-farmer       "Buff Farmer"   2  2  2 2 "Every day: +1 coin" '())
-(dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coin" '())
-(dcard merchant     "Merchant"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
-(dcard thief        "Thief"         3  4  4 1 "Day 2: +1 coin" '())
-(dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
-(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
-(dcard brute        "Brute"         5  7  7 1 "" '())
-(dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has" '())
-(dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point" (list victory-tag))
-(dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
+(dcard buff-farmer  "Senior Undead Worker"   2  2  2 2 "Every day: +1 coin" '())
+(dcard glass        "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
+(dcard merchant     "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
+(dcard thief        "Hired Thug"         3  4  4 1 "Day 2: +1 coin" '())
+(dcard armadillo    "Shield of Greed"  4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
+(dcard brute        "Vengeful Ghost"         5  7  7 1 "" '())
+(dcard interest     "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" '())
+(dcard pepper       "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" (list victory-tag))
+(dcard pearl        "Economic Incantation"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
 (dcard day-tracker  "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
+
+;; card name ideas
+;; vertical incantation/integration
+;; horizontal incantation/integration
+;; bullish bull
+;; bearish bear
+;; something about inflation
+
 
 
 (define every-game-shop-cards
@@ -148,6 +155,7 @@
 (dcard bunny        "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
 (dcard bunny-twin   "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
 (dcard moppet       "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
+(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
 
 (define booster1
   (list
