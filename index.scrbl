@@ -3,11 +3,20 @@
 @(require "cardgame.rkt")
 @(require pict racket/math racket/match racket/list)
 
-@title[#:version ""]{Coin Gremlins Rules}
+@title[#:version ""]{Economancy Rules}
 
-Coin Gremlins is a game about buying cards,
-gaining wealth, and bluffing.
-It can be played by 2-4 players and games
+Modern-day wizards are tired of hiding in remote places,
+studying ancient tomes, and practicing magic.
+These days, wizards want to make money.
+In Economancy, ambitious wizards compete to 
+gain economic dominance of the modern world.
+
+Players take on the role of wizards
+buying cards to build their army.
+Players win by either eliminating
+their competition or by gaining 7 victory points,
+casting a spell over the economy of the world.
+Economancy can be played by 2-4 players and games
 typically last 10-20 minutes.
 
 
