@@ -192,19 +192,19 @@
 (define (area-text str)
   (text str (cons 'bold font-name) 250))
 
-(define (bold-text str #:size [size 100])
+(define (bold-text str #:size [size 80])
   (text str (cons 'bold font-name) size))
 
 (define (bold-underline-text str)
-  (text str (cons 'bold font-name) 100))
+  (text str (cons 'bold font-name) 80))
 
 (define (coin-card-text str)
   (text str (cons 'bold font-name) 200))
 
 (define (large-description-text str)
-  (description-text str #:font-size 100))
+  (description-text str #:font-size 80))
 
-(define (description-text str #:font-size [font-size 80])
+(define (description-text str #:font-size [font-size 60])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
    font-size
@@ -256,6 +256,10 @@
 
 (define (scale-to-height pict height)
   (define scale-factor (/ height (pict-height pict)))
+  (scale pict scale-factor))
+
+(define (scale-to-width pict width)
+  (define scale-factor (/ width (pict-width pict)))
   (scale pict scale-factor))
 
 (define person-image (bitmap "person.png"))

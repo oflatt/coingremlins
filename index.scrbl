@@ -82,7 +82,7 @@ typically last 10-20 minutes.
      (ghost stipend-card)
      (ghost stipend-card)
      coin
-     (ghost stipend-card))
+     (ghost coin))
     (hc-append padding
      (make-area (make-stack (make-list 4 0-coin-card)) "Coin Cards" #:show-box? #f)
      (make-area
@@ -102,7 +102,7 @@ typically last 10-20 minutes.
 @(define pile-of-coins
   (make-pile coin 80))
 
-@(scale-to-height
+@(scale-to-width
   (vc-append (* padding 2)
     (hc-append padding
       (make-area shop-area-cards "Shop Area")
@@ -113,7 +113,7 @@ typically last 10-20 minutes.
     (hc-append (* padding 2)  
       (make-area (player-area player-1-tag) "Player 1 Army Area")
       (make-area (player-area player-2-tag) "Player 2 Army Area")))
-  800)
+  1000)
 
 
 The picture above shows the initial setup
