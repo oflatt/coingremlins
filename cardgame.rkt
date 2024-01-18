@@ -212,6 +212,30 @@
 (define (large-description-text str)
   (description-text str #:font-size large-text-size))
 
+(define (process-description-line line)
+  (define coin (scale-to-height coin-image small-text-size))
+  (let ([strs (regexp-split #px" *coin( +|$)" line)])
+    (map (lambda (e)
+            (cond
+              [(and (string? e)
+                    (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
+              => (lambda (m)
+                    (list (colorize (bold-text (cadr m) #:size (current-font-size))
+                                    "firebrick")
+                          (caddr m)))]
+              [(and (string? e)
+                    (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
+              => (lambda (m)
+                    (define (highlight s)
+                      (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
+                    (list (list-ref m 1)
+                          (highlight (list-ref m 2))
+                          (highlight "victory")
+                          (highlight (list-ref m 3))
+                          (list-ref m 4)))]
+              [else e]))
+          (add-between strs (inset coin (* -0.2 (pict-height coin)))))))
+
 (define (description-text str #:font-size [font-size small-text-size])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
@@ -219,28 +243,7 @@
    (apply vl-append
           (for/list ([line newline-split])
             (parameterize ([current-main-font font-name])
-                    (para (let ([strs (regexp-split #px" *coin( +|$)" line)])
-                            (define coin (scale-to-height coin-image small-text-size) )
-                            (map (lambda (e)
-                                   (cond
-                                     [(and (string? e)
-                                           (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
-                                      => (lambda (m)
-                                           (list (colorize (bold-text (cadr m) #:size (current-font-size))
-                                                           "firebrick")
-                                                 (caddr m)))]
-                                     [(and (string? e)
-                                           (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
-                                      => (lambda (m)
-                                           (define (highlight s)
-                                             (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
-                                           (list (list-ref m 1)
-                                                 (highlight (list-ref m 2))
-                                                 (highlight "victory")
-                                                 (highlight (list-ref m 3))
-                                                 (list-ref m 4)))]
-                                     [else e]))
-                                 (add-between strs (inset coin (* -0.2 (pict-height coin))))))
+                    (para (process-description-line line)
                           #:width (- width (* 2 padding))))))))
 
 
@@ -286,7 +289,7 @@
    (filled-rounded-rectangle
      (+ padding padding (pict-width num-and-image))
      (+ padding padding (pict-height num-and-image))
-     10 #:color "light slate gray" #:draw-border? #f))
+     10 #:border-color "light slate gray" #:color "white" #:border-width 10))
   (if (has-tag? source-card day-tracker-tag)
       (blank)
       (superimpose 'center 'center num-and-image background)))
