@@ -12,7 +12,7 @@
 
 ;; A card has a name, cost, attack, defense, count, and description
 ;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
-(struct card (name cost attack defense count description tags) #:transparent)
+(struct card (png-name name cost attack defense count description tags) #:transparent)
 
 (define victory-tag 'victory)
 (define day-tracker-tag 'day-tracker)
@@ -60,32 +60,32 @@
 
 (define all-cards empty)
 
-(define-syntax-rule (dcard name sname cost attack defense count description tags)
-  (begin (define name (card sname cost attack defense count description tags))
+(define-syntax-rule (dcard name png-name sname cost attack defense count description tags)
+  (begin (define name (card png-name sname cost attack defense count description tags))
          (set! all-cards (cons name all-cards))))
 
-(dcard zero-coins "" 0 0 0 3 "" (list coin-card-tag unbuyable-tag))
-(dcard one-coin ""   1 0 0 3 "" (list coin-card-tag unbuyable-tag))
-(dcard two-coins ""  2 0 0 1 "" (list coin-card-tag unbuyable-tag))
-(dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
-(dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
+(dcard zero-coins #f "" 0 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard one-coin #f ""   1 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard two-coins #f ""  2 0 0 1 "" (list coin-card-tag unbuyable-tag))
+(dcard five-coins #f "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
+(dcard ten-coins #f ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard pass-card    "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
-(dcard stipend      "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
-(dcard stone-wall   "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
-(dcard poison       "Ghost"         2  3  2 2 "Day 3: +1 coin" '())
-(dcard farmer       "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
-(dcard bomb-spirit  "Bubble"        2  9  2 1 "Cannot attack" '())
-(dcard buff-farmer  "Senior Worker"   2  2  2 2 "Every day: +1 coin" '())
-(dcard glass        "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
-(dcard merchant     "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
-(dcard thief        "Thug"         3  4  4 1 "Day 2: +1 coin" '())
-(dcard armadillo    "Shield of Greed"  4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
-(dcard brute        "Golem"         5  7  7 1 "" '())
-(dcard interest     "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" '())
-(dcard pepper       "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" (list victory-tag))
-(dcard pearl        "Economic Incantation"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
-(dcard day-tracker  "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
+(dcard pass-card  #f  "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
+(dcard stipend   #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
+(dcard stone-wall  #f "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
+(dcard poison    #f   "Ghost"         2  3  2 2 "Day 3: +1 coin" '())
+(dcard farmer    #f   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
+(dcard bomb-spirit #f "Bubble"        2  9  2 1 "Cannot attack" '())
+(dcard buff-farmer #f "Senior Worker"   2  2  2 2 "Every day: +1 coin" '())
+(dcard glass    #f   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
+(dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
+(dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" '())
+(dcard armadillo  #f  "Shield of Greed"  4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
+(dcard brute   #f     "Golem"         5  7  7 1 "" '())
+(dcard interest  #f   "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" '())
+(dcard pepper    "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" (list victory-tag))
+(dcard pearl    #f   "Economic Incantation"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
+(dcard day-tracker #f "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
 
 ;; card name ideas
 ;; vertical incantation/integration
@@ -145,17 +145,17 @@
           (list pass-card)))
 
 ;; not in base game
-(dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" '())
-(dcard lizard       "Aggresive Lizard" 3  2  2 1 "Attack phase: gain one coin when attacking other players." '())
-(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" '())
-(dcard coin-gremlin "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
-(dcard strange-flower "Strange Flower" 3 1 3 1 "Has +1 to attack for every card to its right." '())
-(dcard loan         "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
-(dcard white-flag   "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
-(dcard bunny        "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
-(dcard bunny-twin   "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
-(dcard moppet       "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
-(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
+(dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" '())
+(dcard lizard    #f   "Aggresive Lizard" 3  2  2 1 "Attack phase: gain one coin when attacking other players." '())
+(dcard valhalla   #f  "Valhalla"      4  2  9 1 "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" '())
+(dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
+(dcard strange-flower #f  "Strange Flower" 3 1 3 1 "Has +1 to attack for every card to its right." '())
+(dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
+(dcard white-flag #f  "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
+(dcard bunny   #f     "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
+(dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
+(dcard moppet    #f   "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
+(dcard spirit   #f   "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
 
 (define booster1
   (list
@@ -172,10 +172,10 @@
 
 
 ;; twist cards
-(dcard debt "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins" '())
-(dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins" '())
-(dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase" '())
-(dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying\nIf you are correct, get the card and the opponent doesn't\nIf wrong, lose the money" '())
+(dcard debt #f "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins" '())
+(dcard double #f "double" 0 -1 -1 0 "At the start of day 1: double all your coins" '())
+(dcard battlefield #f "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase" '())
+(dcard predict #f "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying\nIf you are correct, get the card and the opponent doesn't\nIf wrong, lose the money" '())
 
 
 
@@ -274,9 +274,16 @@
        (bold-num num)))
   (define scaled-picture
     (scale-to-height image (pict-height num-text)))
+  (define num-and-image (hc-append 20 num-text scaled-picture))
+  (define padding 10)
+  (define background
+   (filled-rounded-rectangle
+     (+ padding padding (pict-width num-and-image))
+     (+ padding padding (pict-height num-and-image))
+     10 #:color "light slate gray" #:draw-border? #f))
   (if (has-tag? source-card day-tracker-tag)
       (blank)
-      (hc-append 20 num-text scaled-picture)))
+      (superimpose 'center 'center num-and-image background)))
 
 
 (define transparent (make-object color% 0 0 0 0))
@@ -348,6 +355,15 @@
     [else
      (render-normal-card card)]))
 
+(define-runtime-path card-art-dir "card-art")
+
+(define (get-card-art card)
+  (cond
+    [(card-png-name card)
+     (define card-art (bitmap (build-path card-art-dir (card-png-name card))))
+     (scale-to-width card-art (- width (* 4 padding)))]
+    [else
+     (blank)]))
 
 (define (render-normal-card card)
   (define base (draw-base card))
@@ -356,6 +372,8 @@
    (if (has-tag? card reference-tag)
        (bold-underline-text (card-name card))
        (bold-text (card-name card))))
+
+  (define card-art (get-card-art card))
   
   (define attack
     (number-icon sword-image (card-attack card) card))
@@ -372,22 +390,26 @@
   
   (with-player-count card
      (superimpose
-        padding (- height (pict-height cost) padding)
+        padding
+        (- height (pict-height cost) padding)
         cost
         (superimpose
           padding (- height (* 5 padding) (pict-height description))
           description
         (superimpose
           (- width padding (pict-width defense))
-          padding
+          (+ padding (pict-height name))
           defense
           (superimpose
-          padding
-          padding
-          attack
-          (superimpose 'center
-           (+ padding (pict-height cost))
-           name base)))))))
+            padding
+            (+ padding (pict-height name))
+            attack
+            (superimpose 'center
+            padding
+            (vc-append 0
+              name
+              card-art)
+            base)))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
 
