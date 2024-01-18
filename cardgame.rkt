@@ -192,19 +192,27 @@
 (define (area-text str)
   (text str (cons 'bold font-name) 250))
 
-(define (bold-text str #:size [size 80])
-  (text str (cons 'bold font-name) size))
+(define large-text-size 60)
+(define small-text-size 50)
 
-(define (bold-underline-text str)
-  (text str (cons 'bold font-name) 80))
+(define (bold-text str #:size [size large-text-size])
+  (text str (cons 'bold font-name) size))
+(define (bold-small-text str)
+  (bold-text str #:size small-text-size))
+
+(define (bold-num num)
+  (bold-text (number->string num)))
+(define (bold-small-num num)
+  (bold-text (number->string num) #:size small-text-size))
+
 
 (define (coin-card-text str)
   (text str (cons 'bold font-name) 200))
 
 (define (large-description-text str)
-  (description-text str #:font-size 80))
+  (description-text str #:font-size large-text-size))
 
-(define (description-text str #:font-size [font-size 60])
+(define (description-text str #:font-size [font-size small-text-size])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
    font-size
@@ -212,7 +220,7 @@
           (for/list ([line newline-split])
             (parameterize ([current-main-font font-name])
                     (para (let ([strs (regexp-split #px" *coin( +|$)" line)])
-                            (define coin (scale coin-image 0.1) )
+                            (define coin (scale-to-height coin-image small-text-size) )
                             (map (lambda (e)
                                    (cond
                                      [(and (string? e)
@@ -237,8 +245,6 @@
 
 
 
-(define (bold-num num)
-  (bold-text (number->string num)))
 
 (define (superimpose x y new base)
   (define xpos
@@ -368,10 +374,7 @@
 (define (render-normal-card card)
   (define base (draw-base card))
     
-  (define name
-   (if (has-tag? card reference-tag)
-       (bold-underline-text (card-name card))
-       (bold-text (card-name card))))
+  (define name (bold-text (card-name card)))
 
   (define card-art (get-card-art card))
   
