@@ -79,7 +79,7 @@
 (dcard farmer    #f   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
 (dcard bomb-spirit #f "Bubble"        2  9  2 1 "Cannot attack" '())
 (dcard buff-farmer #f "Senior Worker"   2  2  2 2 "Every day: +1 coin" '())
-(dcard glass    #f   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
+(dcard glass    "goldfish.png"   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
 (dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
 (dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" '())
 (dcard armadillo  #f  "Shield of Greed"  4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
