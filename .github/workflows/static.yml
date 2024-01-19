@@ -35,6 +35,12 @@ jobs:
         uses: Bogdanp/setup-racket@v1.9
         with:
           version: "8.10"
+      - name: Install Font
+        run: |
+          wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
+          unzip -d pt_sans/ PT_Sans.zip
+          mv pt_sans /usr/share/fonts/
+          fc-cache -fv
       - uses: actions/checkout@master
       - name: "Run makefile"
         uses: coactions/setup-xvfb@v1
