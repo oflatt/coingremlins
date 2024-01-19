@@ -53,8 +53,8 @@
 (define width 822)
 (define height 1122)
 (define padding (* 0.05 width))
-(define border-width (/ width 30))
-(define outline-width (/ width 100))
+(define outline-size 10)
+(define margin-size (/ width 30))
 
 (define card-back
   (filled-rectangle width height #:color "black"))
@@ -286,22 +286,24 @@
   (define scaled-picture
     (scale-to-height image small-text-size))
   (define num-and-image (hc-append 20 num-text scaled-picture))
-  (define padding 10)
   (define background
    (rounded-rect
-     (+ padding padding (pict-width num-and-image))
-     (+ padding padding (pict-height num-and-image))
-     10 #:border-color "light slate gray" #:color "white" #:border-width 10))
+     (+ outline-size outline-size (pict-width num-and-image))
+     (+ outline-size outline-size (pict-height num-and-image))
+     outline-size #:border-color "light slate gray" #:color lighten #:border-width outline-size))
   (if (has-tag? source-card day-tracker-tag)
       (blank)
       (superimpose 'center 'center num-and-image background)))
 
 
 (define transparent (make-object color% 0 0 0 0))
-(define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color "light slate gray"] #:border-width [border-width 10])
+(define lighten (make-object color% 255 255 255 .2))
+(define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color #f] #:border-width [border-width 0]
+#:draw-border? [draw-border? #t])
   (define half (/ border-width 2))
   (inset
-    (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width border-width)
+    (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width (if (equal? border-width 0) #f border-width)
+    #:draw-border? draw-border?)
     half half half half))
 
 (define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
@@ -336,17 +338,17 @@
      [else "white"]))
 
   (superimpose 0 0
-    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-width)
+    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-size)
     (rect-with-border width height
       #:color background-color
       #:border-color border-color
-      #:border-width border-width)))
+      #:border-width margin-size)))
 
 (define (with-player-count card pict)
   (define count (number-icon person-image (card-count card) card))
   (superimpose
-    (- width border-width (pict-width count))
-    (- height (pict-height count) border-width)
+    (- width margin-size (pict-width count))
+    (- height (pict-height count) margin-size)
     count
     pict))
 
@@ -376,14 +378,24 @@
   (cond
     [(card-png-name card)
      (define card-art (bitmap (build-path card-art-dir (card-png-name card))))
-     (scale-to-width card-art (- width (* 4 padding)))]
+     (scale-to-width card-art (- width (* 2 margin-size)))]
     [else
      (blank)]))
+
+(define (render-name card)
+  (define text (bold-text (card-name card)))
+  (superimpose
+   'center 'center
+   text
+   (rounded-rect
+     (+ outline-size outline-size (pict-width text))
+     (+ outline-size outline-size (pict-height text))
+     outline-size #:draw-border? #f #:color lighten)))
 
 (define (render-normal-card card)
   (define base (draw-base card))
     
-  (define name (bold-text (card-name card)))
+  (define name (render-name card))
 
   (define card-art (get-card-art card))
   
@@ -402,26 +414,26 @@
   
   (with-player-count card
      (superimpose
-        border-width
-        (- height (pict-height cost) border-width)
+        margin-size
+        (- height (pict-height cost) margin-size)
         cost
         (superimpose
           padding (- height (* 5 padding) (pict-height description))
           description
         (superimpose
-          (- width border-width (pict-width defense))
-          border-width
+          (- width margin-size (pict-width defense))
+          margin-size
           defense
           (superimpose
-            border-width
-            border-width
+            margin-size
+            margin-size
             attack
             (superimpose 'center
-              (+ padding (pict-height name))
-              card-art
-              (superimpose 'center
               padding
                 name
+              (superimpose 'center
+                margin-size
+                card-art
                 base))))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
