@@ -214,6 +214,9 @@
 (define (large-description-text str)
   (description-text str #:font-size large-text-size))
 
+(define (day-tracker-text str)
+  (description-text str #:font-size 80))
+
 (define (process-description-line line)
   (define coin (scale-to-height coin-image small-text-size))
   (let ([strs (regexp-split #px" *coin( +|$)" line)])
@@ -408,7 +411,7 @@
   
   (define description
     (if (has-tag? card day-tracker-tag)
-        (large-description-text (card-description card))
+        (day-tracker-text (card-description card))
         (description-text (card-description card))))
 
   
