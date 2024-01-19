@@ -53,6 +53,8 @@
 (define width 822)
 (define height 1122)
 (define padding (* 0.05 width))
+(define border-width (/ width 30))
+(define outline-width (/ width 100))
 
 (define card-back
   (filled-rectangle width height #:color "black"))
@@ -192,7 +194,7 @@
 (define (area-text str)
   (text str (cons 'bold font-name) 250))
 
-(define large-text-size 60)
+(define large-text-size 55)
 (define small-text-size 50)
 
 (define (bold-text str #:size [size large-text-size])
@@ -282,11 +284,11 @@
        (bold-text "-")
        (bold-num num)))
   (define scaled-picture
-    (scale-to-height image (pict-height num-text)))
+    (scale-to-height image small-text-size))
   (define num-and-image (hc-append 20 num-text scaled-picture))
   (define padding 10)
   (define background
-   (filled-rounded-rectangle
+   (rounded-rect
      (+ padding padding (pict-width num-and-image))
      (+ padding padding (pict-height num-and-image))
      10 #:border-color "light slate gray" #:color "white" #:border-width 10))
@@ -296,6 +298,12 @@
 
 
 (define transparent (make-object color% 0 0 0 0))
+(define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color "light slate gray"] #:border-width [border-width 10])
+  (define half (/ border-width 2))
+  (inset
+    (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width border-width)
+    half half half half))
+
 (define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
   (superimpose 0 0
     (filled-rectangle width border-width  #:color border-color #:border-width 0)
@@ -310,8 +318,6 @@
       #:border-width 0))))))
 
 (define (draw-base card)
-  (define border-width (/ width 30))
-  (define outline-width (/ width 100))
   (define border-color
    (cond
       [(has-tag? card reference-tag)
@@ -339,8 +345,8 @@
 (define (with-player-count card pict)
   (define count (number-icon person-image (card-count card) card))
   (superimpose
-    (- width padding (pict-width count))
-    (- height (pict-height count) padding)
+    (- width border-width (pict-width count))
+    (- height (pict-height count) border-width)
     count
     pict))
 
@@ -396,26 +402,27 @@
   
   (with-player-count card
      (superimpose
-        padding
-        (- height (pict-height cost) padding)
+        border-width
+        (- height (pict-height cost) border-width)
         cost
         (superimpose
           padding (- height (* 5 padding) (pict-height description))
           description
         (superimpose
-          (- width padding (pict-width defense))
-          (+ padding (pict-height name))
+          (- width border-width (pict-width defense))
+          border-width
           defense
           (superimpose
-            padding
-            (+ padding (pict-height name))
+            border-width
+            border-width
             attack
             (superimpose 'center
-            padding
-            (vc-append 0
-              name
-              card-art)
-            base)))))))
+              (+ padding (pict-height name))
+              card-art
+              (superimpose 'center
+              padding
+                name
+                base))))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
 
