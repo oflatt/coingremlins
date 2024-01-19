@@ -12,7 +12,7 @@
 
 ;; A card has a name, cost, attack, defense, count, and description
 ;; count is number of cards per player, and 0 means only 1 copy per game (twist cards)
-(struct card (name cost attack defense count description tags) #:transparent)
+(struct card (png-name name cost attack defense count description tags) #:transparent)
 
 (define victory-tag 'victory)
 (define day-tracker-tag 'day-tracker)
@@ -53,6 +53,8 @@
 (define width 822)
 (define height 1122)
 (define padding (* 0.05 width))
+(define outline-size 10)
+(define margin-size (/ width 30))
 
 (define card-back
   (filled-rectangle width height #:color "black"))
@@ -60,33 +62,40 @@
 
 (define all-cards empty)
 
-(define-syntax-rule (dcard name sname cost attack defense count description tags)
-  (begin (define name (card sname cost attack defense count description tags))
+(define-syntax-rule (dcard name png-name sname cost attack defense count description tags)
+  (begin (define name (card png-name sname cost attack defense count description tags))
          (set! all-cards (cons name all-cards))))
 
-(dcard zero-coins "" 0 0 0 3 "" (list coin-card-tag unbuyable-tag))
-(dcard one-coin ""   1 0 0 3 "" (list coin-card-tag unbuyable-tag))
-(dcard two-coins ""  2 0 0 1 "" (list coin-card-tag unbuyable-tag))
-(dcard five-coins "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
-(dcard ten-coins ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
+(dcard zero-coins #f "" 0 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard one-coin #f ""   1 0 0 3 "" (list coin-card-tag unbuyable-tag))
+(dcard two-coins #f ""  2 0 0 1 "" (list coin-card-tag unbuyable-tag))
+(dcard five-coins #f "" 5 0 0 2 "" (list coin-card-tag unbuyable-tag))
+(dcard ten-coins #f ""  10 0 0 1 "" (list coin-card-tag unbuyable-tag))
 
-(dcard pass-card      "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
-(dcard stipend      "Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these" (list unbuyable-tag))
-(dcard stone-wall   "Stone Wall"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
-(dcard poison       "Poison"        2  3  2 2 "Day 3: +1 coin" '())
-(dcard farmer       "Farmer"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
-(dcard bomb-spirit  "Bomb Spirit"   2  9  2 1 "Cannot attack" '())
-(dcard buff-farmer       "Buff Farmer"   2  2  2 2 "Every day: +1 coin" '())
-(dcard glass        "Gem"           3  1  2 1 "Day 3: +4 coin" '())
-(dcard merchant     "Merchant"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
-(dcard thief        "Thief"         3  4  4 1 "Day 2: +1 coin" '())
-(dcard armadillo     "Armadillo"      4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
-(dcard spirit       "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
-(dcard brute        "Brute"         5  7  7 1 "" '())
-(dcard interest     "Interest"      1  1  1 1 "Every day: +1 coin for every 3 coins the owner has" '())
-(dcard pepper "Pepper"  2 1 1 2 "Worth 1 victory point" (list victory-tag))
-(dcard pearl  "Pearl"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
-(dcard day-tracker  "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
+(dcard pass-card  #f  "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" '(reference-tag unbuyable-tag))
+(dcard stipend   #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin\nEach player starts with one of these." (list unbuyable-tag))
+(dcard stone-wall  "goldwall.png" "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin\nCan defend twice per turn (unless the first makes it faint)" '())
+(dcard poison    #f   "Ghost"         2  3  2 2 "Day 3: +1 coin" '())
+(dcard farmer    #f   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" '())
+(dcard bomb-spirit #f "Bubble"        2  9  2 1 "Cannot attack" '())
+(dcard buff-farmer #f "Senior Worker"   2  2  2 2 "Every day: +1 coin" '())
+(dcard glass    #f   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" '())
+(dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" '())
+(dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" '())
+(dcard armadillo  #f  "Shield of Greed"  4  2  7 1 "When this card defends: +1 coin (even if it loses)" '())
+(dcard brute   #f     "Golem"         5  7  7 1 "" '())
+(dcard interest  "beanstalk.png"   "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" '())
+(dcard pepper    "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" (list victory-tag))
+(dcard pearl    #f   "Economic Incantation"   4 1 1 3 "Worth 3 victory points" (list victory-tag))
+(dcard day-tracker #f "" -1 -1 -1 0 "Day 1\n\n\nDay 2\n\n\nDay 3" (list day-tracker-tag unbuyable-tag))
+
+;; card name ideas
+;; vertical incantation/integration
+;; horizontal incantation/integration
+;; bullish bull
+;; bearish bear
+;; something about inflation
+
 
 
 (define every-game-shop-cards
@@ -138,16 +147,17 @@
           (list pass-card)))
 
 ;; not in base game
-(dcard underdog     "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" '())
-(dcard lizard       "Aggresive Lizard" 3  2  2 1 "Attack phase: gain one coin when attacking other players." '())
-(dcard valhalla     "Valhalla"      4  2  9 1 "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" '())
-(dcard coin-gremlin "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
-(dcard strange-flower "Strange Flower" 3 1 3 1 "Has +1 to attack for every card to its right." '())
-(dcard loan         "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
-(dcard white-flag   "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
-(dcard bunny        "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
-(dcard bunny-twin   "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
-(dcard moppet       "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
+(dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" '())
+(dcard lizard    #f   "Aggresive Lizard" 3  2  2 1 "Attack phase: gain one coin when attacking other players." '())
+(dcard valhalla   #f  "Valhalla"      4  2  9 1 "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" '())
+(dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "Has +1 to hp and attack for each coin the owner has." '())
+(dcard strange-flower #f  "Strange Flower" 3 1 3 1 "Has +1 to attack for every card to its right." '())
+(dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins. Every day: -2 coin after the buy phase." '())
+(dcard white-flag #f  "White Flag"    3  1  3 1 "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." '())
+(dcard bunny   #f     "Bunny"         2  3  3 1 "3rd income phase after bought:\nGain a bunny twin from the shop." '())
+(dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "Cannot be bought." '())
+(dcard moppet    #f   "Moppet"        4  4  2 1 "Cannot be blocked by cards with less than 4 attack." '())
+(dcard spirit   #f   "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card\n+1 defense and +1 attack for each coin on this card" '())
 
 (define booster1
   (list
@@ -164,10 +174,10 @@
 
 
 ;; twist cards
-(dcard debt "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins" '())
-(dcard double "double" 0 -1 -1 0 "At the start of day 1: double all your coins" '())
-(dcard battlefield "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase" '())
-(dcard predict "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying\nIf you are correct, get the card and the opponent doesn't\nIf wrong, lose the money" '())
+(dcard debt #f "debt" 0 -1 -1 0 "At the end of day 3: lose all your coins" '())
+(dcard double #f "double" 0 -1 -1 0 "At the start of day 1: double all your coins" '())
+(dcard battlefield #f "battlefield" 0 -1 -1 0 "At the start of day 1: do another attack phase" '())
+(dcard predict #f "predict" 0 -1 -1 0 "As a buy, instead of buying a card:\n Predict the card your opponent is buying\nIf you are correct, get the card and the opponent doesn't\nIf wrong, lose the money" '())
 
 
 
@@ -184,53 +194,62 @@
 (define (area-text str)
   (text str (cons 'bold font-name) 250))
 
-(define (bold-text str #:size [size 100])
-  (text str (cons 'bold font-name) size))
+(define large-text-size 55)
+(define small-text-size 50)
 
-(define (bold-underline-text str)
-  (text str (cons 'bold font-name) 100))
+(define (bold-text str #:size [size large-text-size])
+  (text str (cons 'bold font-name) size))
+(define (bold-small-text str)
+  (bold-text str #:size small-text-size))
+
+(define (bold-num num)
+  (bold-text (number->string num)))
+(define (bold-small-num num)
+  (bold-text (number->string num) #:size small-text-size))
+
 
 (define (coin-card-text str)
   (text str (cons 'bold font-name) 200))
 
 (define (large-description-text str)
-  (description-text str #:font-size 100))
+  (description-text str #:font-size large-text-size))
 
-(define (description-text str #:font-size [font-size 80])
+(define (process-description-line line)
+  (define coin (scale-to-height coin-image small-text-size))
+  (let ([strs (regexp-split #px" *coin( +|$)" line)])
+    (map (lambda (e)
+            (cond
+              [(and (string? e)
+                    (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
+              => (lambda (m)
+                    (list (colorize (bold-text (cadr m) #:size (current-font-size))
+                                    "firebrick")
+                          (caddr m)))]
+              [(and (string? e)
+                    (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
+              => (lambda (m)
+                    (define (highlight s)
+                      (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
+                    (list (list-ref m 1)
+                          (highlight (list-ref m 2))
+                          (highlight "victory")
+                          (highlight (list-ref m 3))
+                          (list-ref m 4)))]
+              [else e]))
+          (add-between strs (inset coin (* -0.2 (pict-height coin)))))))
+
+(define (description-text str #:font-size [font-size small-text-size])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
    font-size
    (apply vl-append
           (for/list ([line newline-split])
             (parameterize ([current-main-font font-name])
-                    (para (let ([strs (regexp-split #px" *coin( +|$)" line)])
-                            (define coin (scale coin-image 0.1) )
-                            (map (lambda (e)
-                                   (cond
-                                     [(and (string? e)
-                                           (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
-                                      => (lambda (m)
-                                           (list (colorize (bold-text (cadr m) #:size (current-font-size))
-                                                           "firebrick")
-                                                 (caddr m)))]
-                                     [(and (string? e)
-                                           (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
-                                      => (lambda (m)
-                                           (define (highlight s)
-                                             (colorize (bold-text s #:size (current-font-size)) "forestgreen"))
-                                           (list (list-ref m 1)
-                                                 (highlight (list-ref m 2))
-                                                 (highlight "victory")
-                                                 (highlight (list-ref m 3))
-                                                 (list-ref m 4)))]
-                                     [else e]))
-                                 (add-between strs (inset coin (* -0.2 (pict-height coin))))))
+                    (para (process-description-line line)
                           #:width (- width (* 2 padding))))))))
 
 
 
-(define (bold-num num)
-  (bold-text (number->string num)))
 
 (define (superimpose x y new base)
   (define xpos
@@ -250,6 +269,10 @@
   (define scale-factor (/ height (pict-height pict)))
   (scale pict scale-factor))
 
+(define (scale-to-width pict width)
+  (define scale-factor (/ width (pict-width pict)))
+  (scale pict scale-factor))
+
 (define person-image (bitmap "person.png"))
 (define coin-image (bitmap "coin.png"))
 (define sword-image (bitmap "sword.png"))
@@ -261,13 +284,28 @@
        (bold-text "-")
        (bold-num num)))
   (define scaled-picture
-    (scale-to-height image (pict-height num-text)))
+    (scale-to-height image small-text-size))
+  (define num-and-image (hc-append 20 num-text scaled-picture))
+  (define background
+   (rounded-rect
+     (+ outline-size outline-size (pict-width num-and-image))
+     (+ outline-size outline-size (pict-height num-and-image))
+     outline-size #:border-color "light slate gray" #:color lighten #:border-width outline-size))
   (if (has-tag? source-card day-tracker-tag)
       (blank)
-      (hc-append 20 num-text scaled-picture)))
+      (superimpose 'center 'center num-and-image background)))
 
 
 (define transparent (make-object color% 0 0 0 0))
+(define lighten (make-object color% 255 255 255 .2))
+(define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color #f] #:border-width [border-width 0]
+#:draw-border? [draw-border? #t])
+  (define half (/ border-width 2))
+  (inset
+    (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width (if (equal? border-width 0) #f border-width)
+    #:draw-border? draw-border?)
+    half half half half))
+
 (define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
   (superimpose 0 0
     (filled-rectangle width border-width  #:color border-color #:border-width 0)
@@ -282,8 +320,6 @@
       #:border-width 0))))))
 
 (define (draw-base card)
-  (define border-width (/ width 30))
-  (define outline-width (/ width 100))
   (define border-color
    (cond
       [(has-tag? card reference-tag)
@@ -302,17 +338,17 @@
      [else "white"]))
 
   (superimpose 0 0
-    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-width)
+    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-size)
     (rect-with-border width height
       #:color background-color
       #:border-color border-color
-      #:border-width border-width)))
+      #:border-width margin-size)))
 
 (define (with-player-count card pict)
   (define count (number-icon person-image (card-count card) card))
   (superimpose
-    (- width padding (pict-width count))
-    (- height (pict-height count) padding)
+    (- width margin-size (pict-width count))
+    (- height (pict-height count) margin-size)
     count
     pict))
 
@@ -336,14 +372,32 @@
     [else
      (render-normal-card card)]))
 
+(define-runtime-path card-art-dir "card-art")
+
+(define (get-card-art card)
+  (cond
+    [(card-png-name card)
+     (define card-art (bitmap (build-path card-art-dir (card-png-name card))))
+     (scale-to-width card-art (- width (* 2 margin-size)))]
+    [else
+     (blank)]))
+
+(define (render-name card)
+  (define text (bold-text (card-name card)))
+  (superimpose
+   'center 'center
+   text
+   (rounded-rect
+     (+ outline-size outline-size (pict-width text))
+     (+ outline-size outline-size (pict-height text))
+     outline-size #:draw-border? #f #:color lighten)))
 
 (define (render-normal-card card)
   (define base (draw-base card))
     
-  (define name
-   (if (has-tag? card reference-tag)
-       (bold-underline-text (card-name card))
-       (bold-text (card-name card))))
+  (define name (render-name card))
+
+  (define card-art (get-card-art card))
   
   (define attack
     (number-icon sword-image (card-attack card) card))
@@ -360,22 +414,27 @@
   
   (with-player-count card
      (superimpose
-        padding (- height (pict-height cost) padding)
+        margin-size
+        (- height (pict-height cost) margin-size)
         cost
         (superimpose
           padding (- height (* 5 padding) (pict-height description))
           description
         (superimpose
-          (- width padding (pict-width defense))
-          padding
+          (- width margin-size (pict-width defense))
+          margin-size
           defense
           (superimpose
-          padding
-          padding
-          attack
-          (superimpose 'center
-           (+ padding (pict-height cost))
-           name base)))))))
+            margin-size
+            margin-size
+            attack
+            (superimpose 'center
+              padding
+                name
+              (superimpose 'center
+                margin-size
+                card-art
+                base))))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
 
