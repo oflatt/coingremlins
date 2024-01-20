@@ -76,7 +76,7 @@
 (dcard stone-wall  "goldwall.png" "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin" "Can defend twice per turn (unless the first makes it faint)" '())
 (dcard poison    #f   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" '())
 (dcard farmer    #f   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" '())
-(dcard bomb-spirit #f "Bubble"        2  9  2 1 "Cannot attack" "" '())
+(dcard bomb-spirit "bubble.png" "Bubble"        2  9  2 1 "" "Cannot attack" '())
 (dcard buff-farmer #f "Senior Worker"   2  2  2 2 "Every day: +1 coin" "" '())
 (dcard glass    "goldfish.png"   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" "" '())
 (dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" "" '())
@@ -94,6 +94,10 @@
 ;; bullish bull
 ;; bearish bear
 ;; something about inflation
+;; cash cow
+;; golden goose
+;; laundering / laundry
+;; lottery related
 
 
 
@@ -300,7 +304,7 @@
 
 
 (define transparent (make-object color% 0 0 0 0))
-(define lighten (make-object color% 255 255 255 .2))
+(define lighten (make-object color% 255 255 255 .4))
 (define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color #f] #:border-width [border-width 0]
 #:draw-border? [draw-border? #t])
   (define half (/ border-width 2))
