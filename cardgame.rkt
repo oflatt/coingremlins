@@ -75,9 +75,9 @@
 (dcard stipend   #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall  "goldwall.png" "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin" "Can defend twice per turn (unless the first makes it faint)" '())
 (dcard poison    #f   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" '())
-(dcard farmer    #f   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" '())
+(dcard farmer    "worker.png"   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" '())
 (dcard bomb-spirit "bubble.png" "Bubble"        2  9  2 1 "" "Cannot attack" '())
-(dcard buff-farmer #f "Senior Worker"   2  2  2 2 "Every day: +1 coin" "" '())
+(dcard buff-farmer "senior-worker.png" "Senior Worker"   2  2  2 2 "Every day: +1 coin" "" '())
 (dcard glass    "goldfish.png"   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" "" '())
 (dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" "" '())
 (dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" "" '())
@@ -220,7 +220,7 @@
   (description-text str #:font-size large-text-size))
 
 (define (day-tracker-text str)
-  (description-text str #:font-size 80))
+  (description-text str #:font-size 85))
 
 (define (process-description-line line)
   (define coin (scale-to-height coin-image centered-text-size))
