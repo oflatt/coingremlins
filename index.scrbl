@@ -140,7 +140,7 @@ can earn during the @bold{income phase}.
 
 Each player has their own
 @bold{army area}, which stores the cards they have bought.
-Players keeps these cards in the order
+Players keep these cards in the order
 they bought them, from left to right.
 Players start with one coin and one @stipend-name card.
 Each player has @bold{coin cards}, which they
@@ -184,8 +184,8 @@ These phases are explained in the following sections.
 Economancy cards have a @bold{cost} in the lower-left,
 a @bold{strength} in the upper-left, and a @bold{defense} in the upper-right.
 They also have a @bold{player count} in the lower-right, which
-decides how many of that card are used per player.
-Cards also have a description of their effect
+determines how many of that card are used per player.
+Cards also have a description of their effects
 during the @bold{income phase}.
 Sometimes, cards have special effects during
 other phases, such as the @bold{attack phase}.
@@ -215,7 +215,7 @@ They do this by choosing, secretly, how much
 money they want to spend.
 First, players pick up all of their coin cards
 and hold them in their hand.
-Then each player picks at least one coin card
+Then each player picks one or more coin cards
 from their hand and places them face down
 on the table.
 When all players have chosen their coin cards,
@@ -295,7 +295,7 @@ Any cards that @bold{fainted} are placed in the discard pile.
 
 During the buy phase, players may buy cards from the shop.
 Each player gets one free @bold{buy} per round.
-Cards, like the @merchant-name card, can give players more
+Some cards, like the @merchant-name card, can give players more
 @bold{buys} during the income phase.
 All players buy from the shop simultaneously
 so that no player knows what the others
@@ -305,7 +305,7 @@ are buying.
 To do this, all players first pick up
 all their reference cards.
 Then, each player with a buy remaining
-choses one reference card
+chooses one reference card
 and places it face down on the table.
 @bold{Simultaneously}, all players reveal their 
 choice.
@@ -338,8 +338,8 @@ All three players would pay @(number->string (card-cost stone-wall)) coin, and t
 
 There are two ways to win the game.
 @itemlist[
-  @item{First, if only one player is left in the game, they win.}
-  @item{Second, the first player to reach 7 or more victory points instantly wins, as long as they also have more points than every other player.}
+  @item{If only one player is left in the game, they win.}
+  @item{The first player to reach 7 or more victory points instantly wins, as long as they also have more points than every other player.}
 ]
 
 Multiple players can gain
