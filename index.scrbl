@@ -1,7 +1,20 @@
 #lang scribble/manual
 
 @(require "cardgame.rkt")
-@(require pict racket/math racket/match racket/list)
+@(require pict racket/math racket/match racket/list
+          (only-in scribble/core element style))
+
+@(define (card-name s) (element (style 'sf null) s))
+
+@(define day-tracker-name @card-name{Day Tracker})
+@(define pass-name @card-name{Pass})
+@(define stipend-name @card-name{Sorcerer's Stipend})
+@(define wall-name @card-name{Wall of Wealth})
+@(define interest-name @card-name{Magic Bean Stock})
+@(define poison-name @card-name{Ghost})
+@(define farmer-name @card-name{Worker})
+@(define armadillo-name @card-name{Shield of Greed})
+@(define merchant-name @card-name{Apprentice})
 
 @title[#:version ""]{Economancy Rules}
 
@@ -129,7 +142,7 @@ Each player has their own
 @bold{army area}, which stores the cards they have bought.
 Players keeps these cards in the order
 they bought them, from left to right.
-Players start with one coin and one @code{Stipend} card.
+Players start with one coin and one @stipend-name card.
 Each player has @bold{coin cards}, which they
 used to signal how much money they are spending
 during the @bold{attack phase}.
@@ -140,13 +153,13 @@ during the @bold{buy phase}.
 @(define person-small (scale-to-height person-image 20))
 
 The base game contains @(number->string (length shop-base-game)) types of cards in the shop.
-Each player starts with one @code{Stipend} card.
+Each player starts with one @stipend-name card.
 The rest of the cards are placed on the table
 in the @bold{shop} area.
 Each card has a player count @person-small, which determines how many of
 that card is used per person.
 For example, in a 3-player game, there will be
-6 @code{Stone Wall} cards in the shop.
+6 @wall-name cards in the shop.
 
 
 @section{General Rules}
@@ -156,7 +169,7 @@ each round corresponding to a day in a 3-day cycle.
 First day 1, then day 2, then day 3, 
 then back to day 1 again.
 The current day can be tracked by placing a
-coin on the @code{Day Tracker} card.
+coin on the @day-tracker-name card.
 
 Each round consists of 3 phases: the @bold{income phase}, the @bold{attack phase}, and the @bold{buy phase}.
 The income phase applies effects from each card
@@ -188,8 +201,8 @@ All players perform the income phase at the
 same time.
 However, each player must apply the effects
 of their cards in order from left to right.
-For example, the @code{Income} card gives the player
-interest after the cards to its left and before
+For example, the @interest-name card gives the player
+coins after the cards to its left and before
 those on its right.
 
 TODO example
@@ -263,16 +276,16 @@ defending cards to faint.
   400)
 
 In the above example, the attacking player
-chose a @code{Poison} card to attack with.
-The defending players chose a @code{Poison} card,
-an @code{Armadillo} card, and a @code{Farmer} card, respectively.
-As a result, the attacking @code{Poison} card @bold{faints},
-because the defending @code{Poison} card has a higher
-attack than the attacking @code{Poison} card's defense.
-Also, the defending @code{Poison} card and @code{Farmer} card
+chose a @poison-name card to attack with.
+The defending players chose a @poison-name card,
+an @armadillo-name card, and a @farmer-name card, respectively.
+As a result, the attacking @poison-name card @bold{faints},
+because the defending @poison-name card has a higher
+attack than the attacking @poison-name card's defense.
+Also, the defending @poison-name card and @farmer-name card
 both @bold{faint}, since they have lower defense
-than the attacking @code{Poison} card's attack.
-Finally, the defending @code{Armadillo} card does not @bold{faint}.
+than the attacking @poison-name card's attack.
+Finally, the defending @armadillo-name card does not @bold{faint}.
 
 After a @bold{fight}, the tapped cards are placed back
 in the army area in the same order they were in before.
@@ -282,7 +295,7 @@ Any cards that @bold{fainted} are placed in the discard pile.
 
 During the buy phase, players may buy cards from the shop.
 Each player gets one free @bold{buy} per round.
-Cards, like the @code{Merchant} card, can give players more
+Cards, like the @merchant-name card, can give players more
 @bold{buys} during the income phase.
 All players buy from the shop simultaneously
 so that no player knows what the others
@@ -301,7 +314,7 @@ placing it in their army area to the right of the
 cards already there.
 
 Note that if a player does not wish to buy a
-card, they can place the @code{Pass} reference card. However, the pass reference card
+card, they can place the @pass-name reference card. However, the pass reference card
 still uses a @bold{buy}.
 
 
@@ -317,9 +330,9 @@ and there are not enough for all of them left in the shop.
 In this case, discard all remaining cards of that type in the shop.
 The players that chose that card still spend their money,
 @bold{but none of them get the card}.
-For example, there could be only two @code{Stone Wall} left
+For example, there could be only two @wall-name left
 in the shop but three players have chosen to buy it.
-All three players would pay @(number->string (card-cost stone-wall)) coin, and the two @code{Stone Wall} cards in the shop would be discarded.
+All three players would pay @(number->string (card-cost stone-wall)) coin, and the two @wall-name cards in the shop would be discarded.
 
 @section{Win Conditions}
 
