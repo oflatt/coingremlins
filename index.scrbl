@@ -117,7 +117,7 @@ typically last 10-20 minutes.
 
 
 The picture above shows the initial setup
-for Coin Gremlins.
+for Economancy.
 The shop area stores cards players can buy.
 The day tracker card helps keep track of the
 current day (marked with a coin).
@@ -151,7 +151,7 @@ For example, in a 3-player game, there will be
 
 @section{General Rules}
 
-Coin Gremlins is played in rounds called @bold{days},
+Economancy is played in rounds called @bold{days},
 each round corresponding to a day in a 3-day cycle.
 First day 1, then day 2, then day 3, 
 then back to day 1 again.
@@ -168,7 +168,7 @@ These phases are explained in the following sections.
 
 @(scale-to-height (render-card poison) 400)
 
-Coin gremlin cards have a @bold{cost} in the lower-left,
+Economancy cards have a @bold{cost} in the lower-left,
 a @bold{strength} in the upper-left, and a @bold{defense} in the upper-right.
 They also have a @bold{player count} in the lower-right, which
 decides how many of that card are used per player.
