@@ -13,6 +13,7 @@
 @(define interest-name @card-name{Magic Bean Stock})
 @(define poison-name @card-name{Ghost})
 @(define farmer-name @card-name{Worker})
+@(define buff-farmer-name @card-name{Senior Worker})
 @(define armadillo-name @card-name{Shield of Greed})
 @(define merchant-name @card-name{Apprentice})
 
@@ -205,7 +206,16 @@ For example, the @interest-name card gives the player
 coins after the cards to its left and before
 those on its right.
 
-TODO example
+For example, if a player currently 0 coins at the start of day 1 and
+has @stipend-name, @farmer-name, @interest-name, and @buff-farmer-name
+cards acquired in that order, then @stipend-name adds one coin,
+@farmer-name adds no coins (because it's day 1), @interest-name adds
+no coins (because the player has only 2 coins at that point), and
+@buff-farmer-name adds 1 coin, leaving the player with a total of 3
+coins. Had the player started day 1 with 1 coin, instead, then
+@interest-name would have added a coin (since the player would have 3
+coins at the point of considering the card), leaving the player with a
+total of 5 coins.
 
 @section{Attack Phase: Investing}
 
