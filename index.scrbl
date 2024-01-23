@@ -16,6 +16,7 @@
 @(define buff-farmer-name @card-name{Senior Worker})
 @(define armadillo-name @card-name{Shield of Greed})
 @(define merchant-name @card-name{Apprentice})
+@(define bomb-spirit-name @card-name{Bubble})
 
 @title[#:version ""]{Economancy Rules}
 
@@ -246,15 +247,19 @@ In the case of a tie, no player gets to attack.
 @section{Attack Phase: Attacking}
 
 The attacking player may attack with each of
-their cards once, in the order of their choosing.
+their cards at most once (except as noted on a card, such as the
+@bomb-spirit-name card), in the order of their choosing.
 Likewise, each defending player may defend
-with each of their cards once (except for the stone wall card).
+with each of their cards at most once (except as noted on a card,
+such as the @wall-name card).
 After a card attacks or defends, it is @bold{tapped}
-(turned sideways) to indicate that it has been used.
+(turned sideways) to indicate that it has been used. The attacking player
+may choose not to attack with some cards or choose
+not to attack at all.
 
-Once the attacking player has chosen a card to attack with,
-all other defending players must choose a card to defend with.
-If a defending player has no untapped cards,
+Each time the attacking player chooses a card to attack,
+all other defending players choose a card to defend.
+If a defending player has no untapped cards to defend an attack,
 @bold{they are eliminated from the game}.
 The attacking card @bold{fights} the defending cards.
 
