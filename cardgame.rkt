@@ -85,7 +85,7 @@
 (dcard brute   #f     "Golem"         5  7  7 1 "" "" '())
 (dcard interest  "beanstalk.png"   "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" "" '())
 (dcard pepper    "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" "" (list victory-tag))
-(dcard pearl    #f   "Economic Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag))
+(dcard pearl    "incantation.png"   "Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag))
 (dcard day-tracker #f "" -1 -1 -1 0 "" "Day 1\n\n\nDay 2\n\n\nDay 3"  (list day-tracker-tag unbuyable-tag))
 
 ;; card name ideas
