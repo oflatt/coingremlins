@@ -74,7 +74,7 @@
 (dcard pass-card  #f  "Pass"       -1 -1 -1 -1 "Player chose not to buy a card" "" '(reference-tag unbuyable-tag))
 (dcard stipend   #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list unbuyable-tag))
 (dcard stone-wall  "goldwall.png" "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin" "Can defend twice per turn (unless the first makes it faint)" '())
-(dcard poison    #f   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" '())
+(dcard poison    "ghost.png"   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" '())
 (dcard farmer    "worker.png"   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" '())
 (dcard bomb-spirit "bubble.png" "Bubble"        2  9  2 1 "" "Cannot attack" '())
 (dcard buff-farmer "senior-worker.png" "Senior Worker"   2  2  2 2 "Every day: +1 coin" "" '())
