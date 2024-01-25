@@ -82,7 +82,7 @@
 (dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" "" '())
 (dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" "" '())
 (dcard armadillo  #f  "Shield of Greed"  4  2  7 1 "" "When this card defends: +1 coin (even if it loses)" '())
-(dcard brute   #f     "Golem"         5  7  7 1 "" "" '())
+(dcard brute   "goldem.png"     "Golem"         5  7  7 1 "" "" '())
 (dcard interest  "beanstalk.png"   "Magic Bean Stock"       1 1 1 1 "Every day: +1 coin for every 3 coins the owner has" "" '())
 (dcard pepper    "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" "" (list victory-tag))
 (dcard pearl    "incantation.png"   "Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag))
