@@ -256,11 +256,15 @@ After a card attacks or defends, it is @bold{tapped}
 (turned sideways) to indicate that it has been used. The attacking player
 may choose not to attack with some cards or choose
 not to attack at all.
+After the attack phase, all cards are untapped.
 
 Each time the attacking player chooses a card to attack,
-all other defending players choose a card to defend.
+all other defending players secretly choose a card to defend with.
+Each player chooses a reference card, placing it face down on the table.
+Simultaneously, all players reveal their choices.
 If a defending player has no untapped cards to defend an attack,
 @bold{they are eliminated from the game}.
+If a player has multiple copies of a card, they may choose any of them to defend with.
 The attacking card @bold{fights} the defending cards.
 
 

@@ -285,14 +285,18 @@
 (define sword-image (bitmap "sword.png"))
 (define shield-image (bitmap "shield.png"))
 
-(define (number-icon image num source-card)
-  (define num-text
+(define (number-icon image num source-card #:slash-text [slash-text ""])
+  (define num-text-converted
    (if (equal? num -1)
-       (bold-text "-")
-       (bold-num num)))
+       "-"
+       (number->string num)))
+  (define num-text
+    (if (equal? slash-text "")
+        (bold-text (string-append num-text-converted " "))
+        (bold-text (string-append num-text-converted " " slash-text " "))))
   (define scaled-picture
     (scale-to-height image centered-text-size))
-  (define num-and-image (hc-append 20 num-text scaled-picture))
+  (define num-and-image (hc-append 0 num-text scaled-picture))
   (define background
    (rounded-rect
      (+ outline-size outline-size (pict-width num-and-image))
@@ -352,7 +356,7 @@
       #:border-width margin-size)))
 
 (define (with-player-count card pict)
-  (define count (number-icon person-image (card-count card) card))
+  (define count (number-icon person-image (card-count card) card #:slash-text "/"))
   (superimpose
     (- width margin-size (pict-width count))
     (- height (pict-height count) margin-size)
@@ -562,7 +566,8 @@ end
   (define paper-height dc-height)
   (define num-columns 3)
   (define A4-height 11.7) ;; in inches
-  (define Card-height 3.5) ;; in inches
+  ;; TODO not right size when printed
+  (define Card-height 3.8) ;; in inches
 
 
   (define scale-factor (/ (* Card-height num-columns) A4-height))
