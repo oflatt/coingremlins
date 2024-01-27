@@ -170,10 +170,10 @@
 
 ;; Twists are disabled for now
 #;(define twists
-  (list
-    debt
-    double
-    battlefield))
+    (list
+     debt
+     double
+     battlefield))
 
 (define font-name '("PT Sans" . swiss))
 
@@ -208,35 +208,35 @@
 (define (process-description-line line)
   (define coin (scale-to-height coin-image centered-text-size))
   (map (lambda (e)
-          (cond
-            [(and (string? e)
-                  (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
+         (cond
+           [(and (string? e)
+                 (regexp-match #px"^(Day [1-3]|^Every day)(.*)" e))
             => (lambda (m)
-                  (list (colorize (bold-text (cadr m) #:size (current-font-size))
-                                  "firebrick")
-                        (caddr m)))]
-            [(and (string? e)
-                  (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
+                 (list (colorize (bold-text (cadr m) #:size (current-font-size))
+                                 "firebrick")
+                       (caddr m)))]
+           [(and (string? e)
+                 (regexp-match #px"^(.*) ([0-9]+) victory (points?)(.*)" e))
             => (lambda (m)
-                  (list (list-ref m 1)
-                        (victory-text (list-ref m 2))
-                        (victory-text "victory")
-                        (victory-text (list-ref m 3))
-                        (list-ref m 4)))]
-            [else e]))
-        (add-between (regexp-split #px" *coin( +|$)" line)
-                     (inset coin (* -0.2 (pict-height coin))))))
+                 (list (list-ref m 1)
+                       (victory-text (list-ref m 2))
+                       (victory-text "victory")
+                       (victory-text (list-ref m 3))
+                       (list-ref m 4)))]
+           [else e]))
+       (add-between (regexp-split #px" *coin( +|$)" line)
+                    (inset coin (* -0.2 (pict-height coin))))))
 
 (define (description-text str #:font-size [font-size centered-text-size] #:align [align 'left])
   (define newline-split (regexp-split #px"\n" str))
   (with-size
-   font-size
-   (apply vl-append
-          (for/list ([line newline-split])
-            (parameterize ([current-main-font font-name])
-                    (para (process-description-line line)
-                          #:width (- width (* 2 padding))
-                          #:align align))))))
+      font-size
+    (apply vl-append
+           (for/list ([line newline-split])
+             (parameterize ([current-main-font font-name])
+               (para (process-description-line line)
+                     #:width (- width (* 2 padding))
+                     #:align align))))))
 
 
 
@@ -270,9 +270,9 @@
 
 (define (number-icon image num source-card #:slash-text [slash-text ""])
   (define num-text-converted
-   (if (equal? num -1)
-       "-"
-       (number->string num)))
+    (if (equal? num -1)
+        "-"
+        (number->string num)))
   (define num-text
     (if (equal? slash-text "")
         (bold-text (string-append num-text-converted " "))
@@ -281,7 +281,7 @@
     (scale-to-height image centered-text-size))
   (define num-and-image (hc-append 0 num-text scaled-picture))
   (define background
-   (rounded-rect
+    (rounded-rect
      (+ outline-size outline-size (pict-width num-and-image))
      (+ outline-size outline-size (pict-height num-and-image))
      outline-size #:color lighten #:draw-border? #f))
@@ -293,58 +293,58 @@
 (define transparent (make-object color% 0 0 0 0))
 (define lighten (make-object color% 255 255 255 .4))
 (define (rounded-rect width height radius #:color [color "white"] #:border-color [border-color #f] #:border-width [border-width 0]
-#:draw-border? [draw-border? #t])
+                      #:draw-border? [draw-border? #t])
   (define half (/ border-width 2))
   (inset
-    (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width (if (equal? border-width 0) #f border-width)
-    #:draw-border? draw-border?)
-    half half half half))
+   (filled-rounded-rectangle (- width half) (- height half) radius #:color color #:border-color border-color #:border-width (if (equal? border-width 0) #f border-width)
+                             #:draw-border? draw-border?)
+   half half half half))
 
 (define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
   (superimpose 0 0
-    (filled-rectangle width border-width  #:color border-color #:border-width 0)
-    (superimpose 0 0
-      (filled-rectangle border-width height #:color border-color #:border-width 0)
-      (superimpose (- width border-width) 0
-        (filled-rectangle border-width height #:color border-color #:border-width 0)
-        (superimpose 0 (- height border-width)
-          (filled-rectangle width border-width #:color border-color #:border-width 0)
-          (filled-rectangle width height
-      #:color color
-      #:border-width 0))))))
+               (filled-rectangle width border-width  #:color border-color #:border-width 0)
+               (superimpose 0 0
+                            (filled-rectangle border-width height #:color border-color #:border-width 0)
+                            (superimpose (- width border-width) 0
+                                         (filled-rectangle border-width height #:color border-color #:border-width 0)
+                                         (superimpose 0 (- height border-width)
+                                                      (filled-rectangle width border-width #:color border-color #:border-width 0)
+                                                      (filled-rectangle width height
+                                                                        #:color color
+                                                                        #:border-width 0))))))
 
 (define (draw-base card)
   (define border-color
-   (cond
+    (cond
       [(has-tag? card reference-tag)
-        "white"]
+       "white"]
       [(has-tag? card victory-tag)
-        "light green"]
+       "light green"]
       [(has-tag? card coin-card-tag)
-        "light yellow"]
+       "light yellow"]
       [else "light blue"]))
   (define background-color
-   (cond
-     [(has-tag? card reference-tag)
-      (player-color card)]
-     [(has-tag? card coin-card-tag)
-      (player-color card)]
-     [else "white"]))
+    (cond
+      [(has-tag? card reference-tag)
+       (player-color card)]
+      [(has-tag? card coin-card-tag)
+       (player-color card)]
+      [else "white"]))
 
   (superimpose 0 0
-    (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-size)
-    (rect-with-border width height
-      #:color background-color
-      #:border-color border-color
-      #:border-width margin-size)))
+               (rect-with-border width height #:color transparent #:border-color "black" #:border-width outline-size)
+               (rect-with-border width height
+                                 #:color background-color
+                                 #:border-color border-color
+                                 #:border-width margin-size)))
 
 (define (with-player-count card pict)
   (define count (number-icon person-image (card-count card) card #:slash-text "/"))
   (superimpose
-    (- width margin-size (pict-width count))
-    (- height (pict-height count) margin-size)
-    count
-    pict))
+   (- width margin-size (pict-width count))
+   (- height (pict-height count) margin-size)
+   count
+   pict))
 
 (define (render-coin-card card)
   (define base (draw-base card))
@@ -357,7 +357,7 @@
 
   (with-player-count card
     (superimpose padding padding coin-small
-      (superimpose 'center 'center coin base))))
+                 (superimpose 'center 'center coin base))))
 
 (define (render-card card)
   (cond
@@ -383,60 +383,60 @@
    'center 'center
    text
    (rounded-rect
-     (+ outline-size outline-size (pict-width text))
-     (+ outline-size outline-size (pict-height text))
-     outline-size #:draw-border? #f #:color lighten)))
+    (+ outline-size outline-size (pict-width text))
+    (+ outline-size outline-size (pict-height text))
+    outline-size #:draw-border? #f #:color lighten)))
 
 
 (define (render-normal-card card)
   (define base (draw-base card))
-    
+
   (define name (render-name card))
 
   (define card-art (get-card-art card))
-  
+
   (define attack
     (number-icon sword-image (card-attack card) card))
   (define defense
     (number-icon shield-image (card-defense card) card))
   (define cost
     (number-icon coin-image (card-cost card) card))
-  
+
   (define centered-description
     (description-text (card-centered-description card) #:align 'center))
   (define detailed-description
     (if (has-tag? card day-tracker-tag)
-          (day-tracker-text (card-detailed-description card))
-          (description-text (card-detailed-description card))))
-  
+        (day-tracker-text (card-detailed-description card))
+        (description-text (card-detailed-description card))))
+
   ;; TODO detect when things overlap
   (with-player-count card
+    (superimpose
+     margin-size
+     (- height (pict-height cost) margin-size)
+     cost
      (superimpose
-        margin-size
-        (- height (pict-height cost) margin-size)
-        cost
+      'center
+      (+ margin-size (pict-height card-art) margin-size)
+      centered-description
+      (superimpose
+       padding (- height (* 3 padding) (pict-height detailed-description))
+       detailed-description
+       (superimpose
+        (- width margin-size (pict-width defense))
+        padding
+        defense
         (superimpose
-          'center
-          (+ margin-size (pict-height card-art) margin-size)
-          centered-description
-        (superimpose
-          padding (- height (* 3 padding) (pict-height detailed-description))
-          detailed-description
-        (superimpose
-          (- width margin-size (pict-width defense))
-          padding
-          defense
-          (superimpose
-            margin-size
-            padding
-            attack
-            (superimpose 'center
-              padding
-              name
-              (superimpose 'center
-                margin-size
-                card-art
-                base)))))))))
+         margin-size
+         padding
+         attack
+         (superimpose 'center
+                      padding
+                      name
+                      (superimpose 'center
+                                   margin-size
+                                   card-art
+                                   base)))))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
 
@@ -467,14 +467,14 @@
     (string-append
      "{ "
      (string-join
-     (for/list
-      ([num piles]
-       [i (in-range (length piles))])
-      (format "[~a]=~a" i num))
-     ", "
-     )
+      (for/list
+          ([num piles]
+           [i (in-range (length piles))])
+        (format "[~a]=~a" i num))
+      ", "
+      )
      " }"))
-    
+
 
   (format
    "
@@ -515,7 +515,7 @@ function clickedButton()
     if count < ~a then
       local thesplit = deck.cut(nums[~a-count])
       deck = thesplit[1]
-          
+      
       other = thesplit[2]
       
       count = count + 1
@@ -555,11 +555,11 @@ end
 
   (define scale-factor (/ (* Card-height num-columns) A4-height))
   (define target-height (* paper-height scale-factor))
-  (send pdf-dc start-doc "test.pdf")
+  (send pdf-dc start-doc "cards")
   (for ([pict picts])
-      (send pdf-dc start-page)
-      (draw-pict (scale-to-height pict target-height) pdf-dc 0 0)
-      (send pdf-dc end-page))
+    (send pdf-dc start-page)
+    (draw-pict (scale-to-height pict target-height) pdf-dc 0 0)
+    (send pdf-dc end-page))
   (send pdf-dc end-doc))
 
 (define (make-printable picts)
@@ -584,7 +584,7 @@ end
         4)))
   (cond
     [(zero? per-player)
-      card]
+     card]
     [(< i per-player)
      (add-tag card player-1-tag)]
     [(< i (* per-player 2))
@@ -606,8 +606,8 @@ end
     (apply
      append
      (for/list ([card cardset])
-        (for/list ([i (in-range (card-count-4-players card))])
-            (render-card (with-player-tag card i))))))
+       (for/list ([i (in-range (card-count-4-players card))])
+         (render-card (with-player-tag card i))))))
   (println (format "Game requires printing ~a cards" (length all-picts)))
 
   ;; make printable
@@ -622,7 +622,7 @@ end
          all-picts))
   (define picts-appended
     (make-grid all-picts-smaller))
-  
+
   (define all (build-path cards-dir (string-append output-name ".png")))
   (send (pict->bitmap picts-appended) save-file all 'png))
 
@@ -639,7 +639,8 @@ end
 
   (send (pict->bitmap card-back) save-file (build-path cards-dir "back.png") 'png)
 
-  (save-cards (append every-game base-game booster1) "all-cards"))
+  (save-cards (append every-game base-game) "base-game")
+  (save-cards booster1 "booster1"))
 
 
 
