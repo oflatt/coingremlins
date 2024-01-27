@@ -302,16 +302,16 @@
 
 (define (rect-with-border width height #:color [color "white"] #:border-color [border-color "black"] #:border-width [border-width 1])
   (superimpose 0 0
-               (filled-rectangle width border-width  #:color border-color #:border-width 0)
-               (superimpose 0 0
-                            (filled-rectangle border-width height #:color border-color #:border-width 0)
-                            (superimpose (- width border-width) 0
-                                         (filled-rectangle border-width height #:color border-color #:border-width 0)
-                                         (superimpose 0 (- height border-width)
-                                                      (filled-rectangle width border-width #:color border-color #:border-width 0)
-                                                      (filled-rectangle width height
-                                                                        #:color color
-                                                                        #:border-width 0))))))
+    (filled-rectangle width border-width  #:color border-color #:border-width 0)
+    (superimpose 0 0
+      (filled-rectangle border-width height #:color border-color #:border-width 0)
+        (superimpose (- width border-width) 0
+          (filled-rectangle border-width height #:color border-color #:border-width 0)
+            (superimpose 0 (- height border-width)
+              (filled-rectangle width border-width #:color border-color #:border-width 0)
+                (filled-rectangle width height
+                  #:color color
+                  #:border-width 0))))))
 
 (define (draw-base card)
   (define border-color
