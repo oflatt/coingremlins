@@ -29,6 +29,8 @@
 (define base-game-tag 'base-game)
 ;; cards in booster 1 pack
 (define booster1-tag 'booster1)
+;; cards in booster 2 pack
+(define booster2-tag 'booster2)
 
 (define player-yellow (make-object color% 250 248 117))
 
@@ -107,16 +109,19 @@
 
 ;; ################  BOOSTER 1 ##################################
 (dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" "" (list booster1-tag))
-(dcard lizard    #f   "Aggresive Lizard" 3  2  2 1 "" "Attack phase: gain one coin when attacking other players." (list booster1-tag))
-(dcard valhalla   #f  "Valhalla"      4  2  9 1 "" "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" (list booster1-tag))
+(dcard lizard    #f   "Aggresive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when attacking other players." (list booster1-tag))
 (dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "" "Has +1 to hp and attack for each coin the owner has." (list booster1-tag))
 (dcard strange-flower #f  "Strange Flower" 3 1 3 1 "" "Has +1 to attack for every card to its right." (list booster1-tag))
 (dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins\nEvery day: -2 coin after the buy phase." "" (list booster1-tag))
-(dcard white-flag #f  "White Flag"    3  1  3 1 "" "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." (list booster1-tag))
-(dcard bunny   #f     "Bunny"         2  3  3 1 "" "3rd income phase after bought:\nGain a bunny twin from the shop." (list booster1-tag))
-(dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "" "Cannot be bought." (list booster1-tag))
 (dcard moppet    #f   "Moppet"        4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
 (dcard spirit   #f   "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
+
+
+;; ##################### BOOSTER 2 ###############################
+(dcard white-flag #f  "White Flag"    3  1  3 1 "" "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." (list booster2-tag))
+(dcard bunny   #f     "Bunny"         2  3  3 1 "" "3rd income phase after bought:\nGain a bunny twin from the shop." (list booster2-tag))
+(dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "" "Cannot be bought." (list booster2-tag))
+(dcard valhalla   #f  "Valhalla"      4  2  9 1 "" "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" (list booster2-tag))
 
 ;; card name ideas
 ;; vertical incantation/integration
@@ -137,12 +142,11 @@
                    all-cards)))
 
 
-(define every-game-shop-cards
-  (filter (lambda (card) (not (has-tag? card not-in-shop-tag)))
-          (get-cards-with-tag every-game-tag)))
-
 (define every-game
   (get-cards-with-tag every-game-tag))
+(define every-game-shop-cards
+  (filter (lambda (card) (not (has-tag? card not-in-shop-tag)))
+          every-game))
 
 (define base-game
   (sort-by-cost (get-cards-with-tag base-game-tag)))
@@ -152,6 +156,8 @@
 
 (define booster1
   (sort-by-cost (get-cards-with-tag booster1-tag)))
+(define booster2
+  (sort-by-cost (get-cards-with-tag booster2-tag)))
 
 ;; twist cards, currently unused
 (dcard debt #f "debt" 0 -1 -1 0 "" "At the end of day 3: lose all your coins" '())
