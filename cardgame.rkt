@@ -377,17 +377,20 @@
      (blank pwidth (* pwidth 0.75))]))
 
 (define (card-file-name card)
+  (define name
+    ;; avoid characters that create trouble in filenames
+    (regexp-replace* #rx"['\"\\./<>|?*]" (card-name card) "_"))
   (cond
     [(and (has-tag? card reference-tag) (has-tag? card player-1-tag))
-     (string-append (card-name card) "-player1" ".png")]
+     (string-append name "-player1" ".png")]
     [(and (has-tag? card reference-tag) (has-tag? card player-2-tag))
-     (string-append (card-name card) "-player2" ".png")]
+     (string-append name "-player2" ".png")]
     [(and (has-tag? card reference-tag) (has-tag? card player-3-tag))
-     (string-append (card-name card) "-player3" ".png")]
+     (string-append name "-player3" ".png")]
     [(and (has-tag? card reference-tag) (has-tag? card player-4-tag))
-     (string-append (card-name card) "-player4" ".png")]
+     (string-append name "-player4" ".png")]
     [else
-      (string-append (card-name card) ".png")]))
+      (string-append name ".png")]))
      
 
 (define (render-name card)
