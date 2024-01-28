@@ -1,0 +1,88 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "card.rhm" open
+  "state.rhm" open
+
+export:
+  start_buy
+  add_buy
+  end_buy
+  possible_buy_moves
+
+fun start_buy(s :: State) :~ State:
+  unless s.step is_a (Investing || Attacking)
+  | game_error("buy must start after investing or attacking")
+  s with (step = Buy(0, s.players.map(fun (p :~ Player):
+                                        if p.cards == []
+                                        | pass
+                                        | #false)))
+
+fun add_buy(s :: State,
+            player_index :: Int,
+            card_name :: String) :~ State:
+  let c:
+    for any (c: all_cards):
+      (c.name == card_name) && c
+  unless c
+  | player_error("unrecognized card name")
+  let c :~ Card = c
+  unless c == pass || c.cost
+  | player_error("card cannot be bought")
+  
+  let p = s.players[player_index]
+  when c != pass && c.cost > p.coins
+  | player_error("player does not have enough coins to buy card")
+  
+  match s.step
+  | Buy(step, buy_cards) && buy:
+      when buy_cards[player_index]
+      | game_error("player already used this buy")
+
+      when p.buys == 0
+      | game_error("player does not have buys")
+
+      let new_buy:
+        buy with (buy_cards = buy_cards.set(player_index, c))
+
+      s with (step = new_buy)
+
+fun end_buy(s :: State) :~ State:
+  match s.step
+  | Buy(step, [c :~ Card, ...]):
+      let c_counts:
+        for values(c_counts :~ Map = {}) (c: [c, ...]):
+          unless c | game_error("missing buy for a player")
+          skip_when c == pass
+          c_counts ++ { c: c_counts.get(c, 0) + 1 }
+
+      let new_players:
+        for List (p: s.players,
+                  c: [c, ...]):
+          cond
+          | c == pass:
+              p with (buys = math.max(p.buys-1, 0))
+          | c_counts[c] <= s.shop[c]:
+              p with (buys = p.buys-1,
+                      coins = p.coins - c.cost,
+                      cards = p.cards.add(BoughtCard(c, 0)))
+          | ~else:
+              p with (buys = p.buys-1,
+                      coins = p.coins - c.cost)
+ 
+      let new_shop:
+        for Map ((c, n): s.shop):
+          values(c, math.max(n - c_counts.get(c, 0), 0))
+
+      s with (shop = new_shop,
+              players = new_players,
+              step = Buy(step+1, new_players.map(fun (p :~ Player):
+                                                   if p.buys == 0
+                                                   | pass
+                                                   | #false)))
+fun possible_buy_moves(s :: State, p :: Player) :~ List.of(String):
+  let card_names:
+    for List ((c, n): s.shop):
+      keep_when c.cost <= p.coins
+      c.name
+  card_names.add("Pass")

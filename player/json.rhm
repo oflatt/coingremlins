@@ -1,0 +1,27 @@
+#lang rhombus/static
+
+import:
+  lib("json/main.rkt") as rkt_json
+
+export:
+  write
+  read
+
+fun write(v, out :: Port.Output = Port.Output.current()):
+  fun convert(v):
+    match v
+    | [v, ...]: PairList[convert(v), ...]
+    | { k: v, ... }: { k: convert(v), ... }
+    | v: v
+  rkt_json.#{write-json}(convert(v), out)
+  println("", out)
+  out.flush()
+
+fun read(in :: Port.Input = Port.Input.current()):
+  let v = rkt_json.#{read-json}(in)
+  recur convert(v = v):
+    match v
+    | s :: ReadableString: to_string(s)
+    | PairList[v, ...]: [convert(v), ...]
+    | { k: v, ... }: { k: convert(v), ...}
+    | v: v

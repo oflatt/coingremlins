@@ -1,0 +1,56 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "card.rhm" open
+  "state.rhm" open
+
+export:
+  start_investing
+  add_investment
+  apply_investments
+  winning_investment
+  possible_investing_moves
+
+fun start_investing(s :: State) :~ State:
+  unless s.step is_a Income
+  | game_error("investment must start after income")
+  s with (step = Investing(s.players.map(fun (p :~ Player):
+                                           if p.cards == []
+                                           | 0
+                                           | #false)))
+
+fun add_investment(s :: State,
+                   player_index :: Int,
+                   coins :: Int) :~ State:
+  let p = s.players[player_index]
+  if coins > p.coins
+  | player_error("player attempted to invest more coins than they have")
+  | match s.step
+    | Investing(investments):
+        when investments[player_index] | game_error("player already has an investment")
+        s with (step = Investing(investments.set(player_index, coins)))
+
+fun apply_investments(s :: State) :~ State:
+  match s.step
+  | Investing(investments):
+      s with (players = (for List (p: s.players,
+                                   investment: investments):
+                           p with (coins = p.coins - investment)))                       
+
+fun winning_investment(s :: State) :: maybe(Int):
+  let investments = Investing.investments(s.step)
+  unless (for all (investment: investments): investment)
+  | game_error("not all players have invested")
+  let max_investment = math.max(& investments)
+  let winner:
+    for values(winner = #false) (investment: investments,
+                                 i: 0..):
+      if investment == max_investment
+      | if winner == #false
+        | i
+        | #'none
+      | winner
+  winner != #'none && winner
+
+fun possible_investing_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
+  for List (i: 0..p.coins): i
