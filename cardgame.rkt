@@ -111,13 +111,14 @@
 (dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" "" (list booster1-tag))
 (dcard lizard    #f   "Aggresive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when attacking other players." (list booster1-tag))
 (dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "" "Has +1 to hp and attack for each coin the owner has." (list booster1-tag))
-(dcard strange-flower #f  "Strange Flower" 3 1 3 1 "" "Has +1 to attack for every card to its right." (list booster1-tag))
+(dcard gold-mine   #f   "Gold mine"    3  2  2 1 "" "Day 2: +1 coin for each card to the right of this card." (list booster1-tag))
 (dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins\nEvery day: -2 coin after the buy phase." "" (list booster1-tag))
 (dcard moppet    #f   "Moppet"        4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
-(dcard spirit   #f   "Spirit"        3  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
+(dcard spirit   #f   "Spirit"        2  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
 
 
 ;; ##################### BOOSTER 2 ###############################
+(dcard strange-flower #f  "Strange Flower" 3 1 3 1 "" "Has +1 to attack for every card to its right." (list booster1-tag))
 (dcard white-flag #f  "White Flag"    3  1  3 1 "" "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." (list booster2-tag))
 (dcard bunny   #f     "Bunny"         2  3  3 1 "" "3rd income phase after bought:\nGain a bunny twin from the shop." (list booster2-tag))
 (dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "" "Cannot be bought." (list booster2-tag))
