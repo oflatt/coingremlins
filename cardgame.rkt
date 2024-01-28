@@ -78,16 +78,16 @@
   (begin (define name (card png-name sname cost attack defense count centered-description detailed-description tags))
          (set! all-cards (cons name all-cards))))
 
-(dcard zero-coins #f "" 0 0 0 3 "" "" (list coin-card-tag not-in-shop-tag every-game-tag))
-(dcard one-coin #f ""   1 0 0 3 "" "" (list coin-card-tag not-in-shop-tag every-game-tag))
-(dcard two-coins #f ""  2 0 0 1 "" "" (list coin-card-tag not-in-shop-tag every-game-tag))
-(dcard five-coins #f "" 5 0 0 2 "" "" (list coin-card-tag not-in-shop-tag every-game-tag))
-(dcard ten-coins #f ""  10 0 0 1 "" "" (list coin-card-tag not-in-shop-tag every-game-tag))
+(dcard zero-coins #f "Zero Coins" 0 0 0 3 "" "" (list coin-card-tag not-in-shop-tag every-game-tag reference-tag))
+(dcard one-coin #f "One Coin"   1 0 0 3 "" "" (list coin-card-tag not-in-shop-tag every-game-tag reference-tag))
+(dcard two-coins #f "Two Coins"  2 0 0 1 "" "" (list coin-card-tag not-in-shop-tag every-game-tag reference-tag))
+(dcard five-coins #f "Five Coins" 5 0 0 2 "" "" (list coin-card-tag not-in-shop-tag every-game-tag reference-tag))
+(dcard ten-coins #f "Ten Coins"  10 0 0 1 "" "" (list coin-card-tag not-in-shop-tag every-game-tag reference-tag))
 
 
 (dcard pass-card  #f  "Pass"       -1 -1 -1 1 "Player chose not to buy a card" "" (list reference-tag not-in-shop-tag every-game-tag))
 (dcard stipend    #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list not-in-shop-tag every-game-tag))
-(dcard day-tracker #f "" -1 -1 -1 0 "" "Day 1\n\n\nDay 2\n\n\nDay 3"  (list day-tracker-tag not-in-shop-tag every-game-tag))
+(dcard day-tracker #f "Day Tracker" -1 -1 -1 0 "" "Day 1\n\n\nDay 2\n\n\nDay 3"  (list day-tracker-tag not-in-shop-tag every-game-tag))
 (dcard pepper      "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" "" (list victory-tag every-game-tag))
 (dcard pearl      "incantation.png"   "Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag every-game-tag))
 
@@ -316,18 +316,16 @@
 (define (draw-base card)
   (define border-color
     (cond
+      [(has-tag? card coin-card-tag)
+       "light yellow"]
       [(has-tag? card reference-tag)
        "white"]
       [(has-tag? card victory-tag)
        "light green"]
-      [(has-tag? card coin-card-tag)
-       "light yellow"]
       [else "light blue"]))
   (define background-color
     (cond
       [(has-tag? card reference-tag)
-       (player-color card)]
-      [(has-tag? card coin-card-tag)
        (player-color card)]
       [else "white"]))
 
@@ -376,6 +374,20 @@
      (scale-to-width card-art pwidth)]
     [else
      (blank pwidth (* pwidth 0.75))]))
+
+(define (card-file-name card)
+  (cond
+    [(and (has-tag? card reference-tag) (has-tag? card player-1-tag))
+     (string-append (card-name card) "-player1" ".png")]
+    [(and (has-tag? card reference-tag) (has-tag? card player-2-tag))
+     (string-append (card-name card) "-player2" ".png")]
+    [(and (has-tag? card reference-tag) (has-tag? card player-3-tag))
+     (string-append (card-name card) "-player3" ".png")]
+    [(and (has-tag? card reference-tag) (has-tag? card player-4-tag))
+     (string-append (card-name card) "-player4" ".png")]
+    [else
+      (string-append (card-name card) ".png")]))
+     
 
 (define (render-name card)
   (define text (bold-text (card-name card)))
@@ -602,12 +614,21 @@ end
                        #:when (not (has-tag? card not-in-shop-tag)))
               (reference-card card))))
 
+  (define cards-directory (build-path cards-dir output-name))
+  ;; make the cards directory
+  (make-directory cards-directory)
+
   (define all-picts
     (apply
      append
      (for/list ([card cardset])
        (for/list ([i (in-range (card-count-4-players card))])
-         (render-card (with-player-tag card i))))))
+         (define card-for-player (with-player-tag card i))
+         (define card-file (build-path cards-directory (card-file-name card-for-player)))
+         (define card-pict (render-card card-for-player))
+         (unless (file-exists? card-file)
+           (send (pict->bitmap card-pict) save-file card-file 'png))
+         card-pict))))
   (println (format "Game requires printing ~a cards" (length all-picts)))
 
   ;; make printable
