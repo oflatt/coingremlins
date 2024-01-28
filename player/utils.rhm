@@ -1,0 +1,11 @@
+#lang rhombus/static
+
+export:
+  player_error
+  game_error
+
+// reflects a bug in a player
+def player_error = error
+
+// reflects a detected bug in the game driver
+def game_error = error

@@ -1,0 +1,147 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "state.rhm" open
+  "income.rhm" open
+  "investing.rhm" open
+  "attacking.rhm" open
+  "buy.rhm" open
+  "winner.rhm" open
+  "json.rhm"
+
+export:
+  drive_game
+
+fun drive_game(number_of_players :: Int,
+               move :: Function, // (State, player_index, data) -> (move, data)
+               ~data = #false,
+               ~simple: simple :: Boolean = #true):
+  fun get_move(s :~ State, i, pred):
+    let (v, data) = move(s, i, s.data)
+    if pred(v)
+    | values(s with (data = data), v)
+    | player_error("bad move: " +& to_string(v, ~mode: #'expr))
+  fun is_NonnegInt(v): v is_a NonnegInt
+  fun is_String(v): v is_a String
+
+  fun income_phase(s):
+    let s = income(s)
+    investing_phase(s)
+
+  fun investing_phase(s):
+    let s = start_investing(s)
+    let s:
+      for values(s = s) (p: s.players,
+                         i: 0..):
+        if p.cards == []
+        | s
+        | let (s, investment) = get_move(s, i, is_NonnegInt)
+          add_investment(s, i, investment)
+    attacking_phase(apply_investments(s))
+
+  fun attacking_phase(s):
+    let attacker_index = winning_investment(s)
+    if !attacker_index
+    | buy_phase(s)
+    | let s = start_attacking(s, attacker_index)
+      recur attacking_loop(s :~ State = s):
+        if !player_can_attack(s.players[attacker_index])
+        | let s = end_attacking(s)
+          buy_phase(s)
+        | let (s, card_index) = get_move(s, attacker_index, is_NonnegInt)
+          if card_index == 0 // => chose not to attack
+          | let s = end_attacking(s)
+            buy_phase(s)
+          | let s = select_attacker_card(s, card_index)
+            let s:
+             for values(s :~ State = s) (p: s.players,
+                                         i: 0..):
+               cond
+               | i == attacker_index: s
+               | Attacking.defender_card_indexes(s.step)[i] == 0: s
+               | ~else:
+                   let (s, card_index) = get_move(s, i, is_NonnegInt)
+                   select_defender_card(s, i, card_index)
+            let s = advance_attacker(s)
+            if winner_index(s)
+            | s
+            | attacking_loop(s)
+
+  fun buy_phase(s):
+    let s = start_buy(s)
+    let s:
+      recur buy_loop(s :~ State = s):
+        if (for all (p: s.players):
+              p.buys == 0)
+        | s
+        | let s:
+            for values(s = s) (p: s.players,
+                               i: 0..):
+              cond
+              | p.buys > 0:
+                  let (s, card_name) = get_move(s, i, is_String)
+                  add_buy(s, i, card_name)
+              | ~else:
+                  s
+          let s = end_buy(s)
+          if winner_index(s)
+          | s
+          | buy_loop(s)
+    if winner_index(s)
+    | s
+    | income_phase(new_day(s))    
+
+  let s = make_game(number_of_players,
+                    ~simple: simple,
+                    ~data: data)
+  income_phase(s)
+
+fun drive_stdio_game(player_exes :: List.of(Path),
+                     ~simple: simple :: Boolean = #true):
+  import:
+    lib("racket/base.rkt") as rkt
+    lib("racket/port.rkt") as rkt_port
+  class Process(handle, in :: Port.Output, out :: Port.Input)
+  let procs :~ List.of(Process):
+    for List (exe: player_exes):
+      let (handle, out, in, err) = rkt.subprocess(#false, #false, #false, exe)
+      rkt.thread(fun (): rkt_port.#{copy-port}(err, Port.Output.current_error()))
+      Process(handle, in, out)
+  drive_game(procs.length(),
+             fun (s :: State, player_index, data):
+               let s_map = state_to_map(s) ++ { #'player: player_index }
+               json.write(s_map)
+               json.write(s_map, procs[player_index].in)
+               let move = json.read(procs[player_index].out)
+               json.write(move)
+               values(move, data),
+             ~simple: simple)
+
+module main:
+  import:
+    lib("racket/base.rkt") as rkt
+  fun finish(s): json.write(state_to_map(s))
+  match rkt.#{current-command-line-arguments}()
+  | Array(): #void
+  | Array("--full", exe, ...):
+      finish(drive_stdio_game([Path(exe), ...], ~simple: #false))
+  | Array(exe, ...):
+      finish(drive_stdio_game([Path(exe), ...]))
+
+module test:
+  drive_game(
+    2,
+    fun (s :: State, i, moves :~ List):
+      println([i, state_to_map(s)])
+      values(moves.first, moves.rest),
+    ~data:
+      [0, 0, // invest
+       "Worker", "Senior Worker", // buy
+       1, 0, // invest
+       1, 1, // attack & defend
+       "Ghost", "Pass",
+       2, 1,
+       2, 1, // attack & defense
+       1, // second attack wins
+       "does not get here"] 
+  )

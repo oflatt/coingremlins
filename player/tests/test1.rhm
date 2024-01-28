@@ -1,0 +1,91 @@
+#lang rhombus/static
+import:
+  "../state.rhm" open
+  "../income.rhm" open
+  "../investing.rhm" open
+  "../attacking.rhm" open
+  "../buy.rhm" open
+  "../winner.rhm" open
+
+fun add_buy_and_report(s, player_index, card_name):
+  let s = add_buy(s, player_index, card_name)
+  values(s, s.players[player_index].cards.length())
+
+let s = make_game(2, ~simple: #true)
+let s = income(s)
+
+let alice = 0
+let bob = 1
+
+let s = start_investing(s)
+let s = add_investment(s, alice, 0)
+let s = add_investment(s, bob, 0)
+check winning_investment(s) ~is #false
+
+let s = start_buy(s)
+let (s, alice_worker) = add_buy_and_report(s, alice, "Worker")
+let (s, bob_senior_worker) = add_buy_and_report(s, bob, "Senior Worker")
+let s = end_buy(s)
+
+check s.players[alice].cards[alice_worker].card.name ~is "Worker"
+check s.players[bob].cards[bob_senior_worker].card.name ~is "Senior Worker"
+
+check winner_index(s) ~is #false
+
+let s = new_day(s)
+let s = income(s)
+
+check s.players[alice].coins ~is 3
+check s.players[bob].coins ~is 2
+
+let s = start_investing(s)
+let s = add_investment(s, alice, 1)
+let s = add_investment(s, bob, 2)
+let s = apply_investments(s)
+check winning_investment(s) ~is bob
+
+check s.players[alice].coins ~is 2
+check s.players[bob].coins ~is 0
+
+let s = start_attacking(s, bob)
+let s = select_attacker_card(s, bob_senior_worker)
+let s = select_defender_card(s, alice, alice_worker)
+let s = advance_attacker(s)
+let s = end_attacking(s)
+
+check winner_index(s) ~is #false
+
+let s = start_buy(s)
+let (s, alice_ghost) = add_buy_and_report(s, alice, "Ghost")
+let s = add_buy(s, bob, "Pass")
+let s = end_buy(s)
+
+check winner_index(s) ~is #false
+
+let s = new_day(s)
+let s = income(s)
+
+let s = start_investing(s)
+let s = add_investment(s, alice, 2)
+let s = add_investment(s, bob, 0)
+let s = apply_investments(s)
+check winning_investment(s) ~is alice
+
+check player_can_attack(s.players[alice]) ~is #true
+check player_can_attack(s.players[bob]) ~is #true
+
+let s = start_attacking(s, alice)
+let s = select_attacker_card(s, alice_ghost)
+let s = select_defender_card(s, bob, bob_senior_worker)
+let s = advance_attacker(s)
+
+check winner_index(s) ~is #false
+check player_can_attack(s.players[alice]) ~is #true
+check player_can_attack(s.players[bob]) ~is #false
+
+let s = select_attacker_card(s, alice_worker)
+let s = advance_attacker(s)
+
+let s = end_attacking(s)
+
+check winner_index(s) ~is alice
