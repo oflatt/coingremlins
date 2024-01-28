@@ -425,6 +425,13 @@
         (day-tracker-text (card-detailed-description card))
         (description-text (card-detailed-description card))))
 
+  (define (inset-art card-art)
+    (if (has-tag? card reference-tag)
+        (let ([margin 0.2])
+          (cc-superimpose (scale card-art (- 1 margin))
+                          (ghost card-art)))
+        card-art))
+
   ;; TODO detect when things overlap
   (with-player-count card
     (superimpose
@@ -451,7 +458,7 @@
                       name
                       (superimpose 'center
                                    margin-size
-                                   card-art
+                                   (inset-art card-art)
                                    base)))))))))
 ;; cards folder relative to this script
 (define-runtime-path cards-dir "docs")
