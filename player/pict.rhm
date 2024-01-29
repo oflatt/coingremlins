@@ -76,7 +76,9 @@ fun shop_pict(vs :: ViewState) :~ Pict:
       let cp = card_picts[c]
       let cp:
         cond
-        | vs.s.shop[c] == 0: cp.fade(0.3)
+        | vs.s.shop[c] == 0:
+            // would write cp.fade(0.3), but work around a Cairo bug in PDF generation
+            overlay(cp, rectangle(cp, cp, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
         | ~else: cp
       let p:
         above(cp,
