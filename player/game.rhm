@@ -127,7 +127,7 @@ module main:
   fun finish(s): json.write(state_to_map(s))
   match rkt.#{current-command-line-arguments}()
   | Array(): #void
-  | Array("--full", exe, ...):
+  | Array("--base", exe, ...):
       finish(drive_stdio_game([Path(exe), ...], ~simple: #false))
   | Array(exe, ...):
       finish(drive_stdio_game([Path(exe), ...]))

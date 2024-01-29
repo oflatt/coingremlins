@@ -9,8 +9,6 @@ import:
   "investing.rhm" open
   "pict.rhm" open
 
-// incomplete, but an idea about how a GUI might work
-
 let s = make_game(2)
 let s = income(s)
 let s = start_investing(s)
@@ -31,7 +29,7 @@ fun draw(dc :: draw.DC, content):
   let [view, p, dx, dy] = render_to_size(content, w, h)
   rkt.#{draw-pict}(p, dc.handle, dx, dy)
 
-fun on_mouse(ev :: gui.MouseEvent, area :: gui.CanvasArea):
+fun on_mouse(ev :: gui.MouseEvent, area :: gui.CanvasContext):
   when ev.kind == #'left_down
   | let vs :: ViewState = content.value
     let draw.Size(w, h) = area.client_size
