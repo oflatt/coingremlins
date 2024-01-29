@@ -13,10 +13,10 @@ export:
 fun start_buy(s :: State) :~ State:
   unless s.step is_a (Investing || Attacking)
   | game_error("buy must start after investing or attacking")
-  s with (step = Buy(0, s.players.map(fun (p :~ Player):
-                                        if p.cards == []
-                                        | pass
-                                        | #false)))
+  s with (step = Buy(s.players.map(fun (p :~ Player):
+                                     if p.cards == []
+                                     | pass
+                                     | #false)))
 
 fun add_buy(s :: State,
             player_index :: Int,
@@ -35,7 +35,7 @@ fun add_buy(s :: State,
   | player_error("player does not have enough coins to buy card")
   
   match s.step
-  | Buy(step, buy_cards) && buy:
+  | Buy(buy_cards) && buy:
       when buy_cards[player_index]
       | game_error("player already used this buy")
 
@@ -49,7 +49,7 @@ fun add_buy(s :: State,
 
 fun end_buy(s :: State) :~ State:
   match s.step
-  | Buy(step, [c :~ Card, ...]):
+  | Buy([c :~ Card, ...]):
       let c_counts:
         for values(c_counts :~ Map = {}) (c: [c, ...]):
           unless c | game_error("missing buy for a player")
@@ -76,10 +76,10 @@ fun end_buy(s :: State) :~ State:
 
       s with (shop = new_shop,
               players = new_players,
-              step = Buy(step+1, new_players.map(fun (p :~ Player):
-                                                   if p.buys == 0
-                                                   | pass
-                                                   | #false)))
+              step = Buy(new_players.map(fun (p :~ Player):
+                                          if p.buys == 0
+                                          | pass
+                                          | #false)))
 fun possible_buy_moves(s :: State, p :: Player) :~ List.of(String):
   let card_names:
     for List ((c, n): s.shop):

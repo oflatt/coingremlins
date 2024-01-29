@@ -29,8 +29,6 @@ class Investing(investments :: List.of(maybe(Int))):
   export unrep
 
 class Attacking(attacker_index :: Int,
-                // starts at 0:
-                step :: Int,
                 // #false until the attacker selects
                 attacker_card_index :: maybe(Int),
                 // will have #false for attacker, and
@@ -40,29 +38,24 @@ class Attacking(attacker_index :: Int,
   extends Step
   override rep(): {
                     #'name: "attacking",
-                    #'step: step,
                     #'attacker: attacker_index,
                     #'attacker_card: attacker_card_index
                   }
-  fun unrep({ #'step: step,
-              #'attacker: attacker_index,
+  fun unrep({ #'attacker: attacker_index,
               #'attacker_card: attacker_card_index },
             players :~ List):
     Attacking(attacker_index,
-              step,
               attacker_card_index,
               players.map(fun (p): #false))
   export unrep
   
-class Buy(step :: Int, // starts at 0
-          buy_cards :: List.of(maybe(Card))):
+class Buy(buy_cards :: List.of(maybe(Card))):
   extends Step
   override rep(): {
                     #'name: "buy",
-                    #'step: step,
                   }  
-  fun unrep({ #'step: step }, players :~ List):
-    Buy(step, players.map(fun (p): #false))
+  fun unrep(_, players :~ List):
+    Buy(players.map(fun (p): #false))
   export unrep
 
 class State(day :: Int.in(1, 3 ~inclusive),

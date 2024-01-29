@@ -22,11 +22,10 @@ fun start_attacking(s :: State,
                     attacker_index :: Int) :~ State:
   unless s.step is_a Investing
   | game_error("attacking must start after investing")
-  s with (step = new_attacking_state(attacker_index, 0, s.players))
+  s with (step = new_attacking_state(attacker_index, s.players))
 
-fun new_attacking_state(attacker_index, step, players :~ List):
+fun new_attacking_state(attacker_index, players :~ List):
   Attacking(attacker_index,
-            step,
             #false,
             players.map(fun (p :~ Player):
                           if (for all (bc: p.cards):
@@ -46,7 +45,7 @@ fun end_attacking(s :: State) :~ State:
 fun select_attacker_card(s :: State,
                          card_index :: Int) :~ State:
   match s.step
-  | Attacking(attacker_index, _, attacker_card_index, _) && step:
+  | Attacking(attacker_index, attacker_card_index, _) && step:
       when attacker_card_index
       | game_error("attacker has already selected an attacker card")
         
@@ -74,7 +73,7 @@ fun select_defender_card(s :: State,
                          player_index :: Int,
                          card_index :: Int) :~ State:
   match s.step
-  | Attacking(attacker_index, _, _, defender_card_indexes) && step:
+  | Attacking(attacker_index, _, defender_card_indexes) && step:
       when player_index == attacker_index
       | game_error("defender is the attacker")
       when defender_card_indexes[player_index]
@@ -102,7 +101,7 @@ fun select_defender_card(s :: State,
 
 fun advance_attacker(s :: State) :~ State:
   match s.step
-  | Attacking(attacker_index, step, attacker_card_index, defender_card_indexes):
+  | Attacking(attacker_index, attacker_card_index, defender_card_indexes):
       unless attacker_index
       | game_error("attacker card is not selected")
         
@@ -139,7 +138,7 @@ fun advance_attacker(s :: State) :~ State:
                   p
 
       s with (players = new_players,
-              step = new_attacking_state(attacker_index, step+1, new_players))
+              step = new_attacking_state(attacker_index, new_players))
 
 fun possible_attacking_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
   [0] ++ (for List (bc: p.cards,

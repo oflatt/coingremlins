@@ -35,7 +35,7 @@ export:
 defn.macro 'pict_table $id':
   let [[sym, str], ...] = card_meta_list
   let [path_name, ...] = [Syntax.make_temp_id(sym), ...]
-  fun fixup(name): "../docs/base-game" ++ rkt.#{regexp-replace}(#{#rx"'"}, name, "_") ++ ".png"
+  fun fixup(name): "../docs/base-game/" ++ rkt.#{regexp-replace}(#{#rx"'"}, name, "_") ++ ".png"
   let [str, ...] = [fixup(str), ...]
   'runtime_path.def $path_name: $str
    ...
