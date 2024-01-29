@@ -241,9 +241,10 @@ module main:
       slide(fit_on_screen(view.pict))
 
       let next_v = json.read()
-      if next_v is_a Map
-      | loop(v)
-      | let vs:
+      if next_v is_a Map || next_v == Port.eof
+      | loop(next_v)
+      | let [next_v] = next_v // remove JSON array wrapper
+        let vs:
           cond
           | next_v is_a String:
               if next_v != "Pass"

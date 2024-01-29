@@ -114,7 +114,11 @@ fun drive_stdio_game(player_exes :: List.of(Path),
                json.write(s_map, procs[player_index].in)
                let move = json.read(procs[player_index].out)
                json.write(move)
-               values(move, data),
+               match move
+               | [move]:
+                  values(move, data)
+               | ~else:
+                  player_error("move is not in an array: " +& to_string(move, ~mode: #'expr)),
              ~simple: simple)
 
 module main:

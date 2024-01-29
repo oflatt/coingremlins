@@ -40,5 +40,5 @@ recur loop():
           | ["Pass"]
           | candidates
     let move = candidate_moves[random(candidate_moves.length())]
-    json.write(move)
+    json.write([move])
     loop()

@@ -22,5 +22,5 @@ recur loop():
       | phase :: Buy:
           possible_buy_moves(s, me).remove("Pass")
     let move = candidate_moves[random(candidate_moves.length())]
-    json.write(move)
+    json.write([move])
     loop()
