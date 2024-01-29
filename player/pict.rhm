@@ -15,6 +15,7 @@ import:
       table
   "utils.rhm" open
   "state.rhm" open
+  "winner.rhm" open
   "card.rhm" open
   meta:
     lib("racket/base.rkt") as rkt
@@ -176,7 +177,9 @@ fun player_view(vs :: ViewState, player_index) :~ PlayerView:
     | p
   [PlayerView(
      ~pict: rectangle(~around: p.inset(20),
-                      ~line_width: if player_index == vs.player_index | 3 | 1),      
+                      ~fill: if player_index == winner_index(vs.s) | "yellow" | #false,
+                      ~line_width: if player_index == vs.player_index | 3 | 1,
+                      ~line: if player_index == vs.player_index | "green" | "black"),
      ~cards: cards,
      ~coins: coins
    ),
