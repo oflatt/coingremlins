@@ -51,7 +51,9 @@
 
 (define (card-count-4-players card)
   (cond
-    [(has-tag? card reference-tag) 4]
+    [(and (has-tag? card reference-tag)
+          (not (has-tag? card coin-card-tag)))
+     4]
     [(equal? (card-count card) 0) 1]
     [else (* 4 (card-count card))]))
 
