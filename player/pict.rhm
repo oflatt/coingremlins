@@ -120,7 +120,7 @@ fun player_buttons(vs :: ViewState, player_index, mode):
                      | possible_defending_moves(vs.s, vs.s.players[player_index]).has_element(card_index))
                  && fun (): card_index,
                "End Attack",
-               mode == #'attacking && fun (): "Pass",
+               mode == #'attacking && fun (): 0, // 0 means "Pass"
                #'center)
     | #'buy:
         let card_name = if vs.selected_shop_card | Card.name(vs.selected_shop_card) | ""

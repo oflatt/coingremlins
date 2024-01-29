@@ -51,7 +51,8 @@ fun end_buy(s :: State) :~ State:
   match s.phase
   | Buy([c :~ Card, ...]):
       let c_counts:
-        for values(c_counts :~ Map = {}) (c: [c, ...]):
+        for values(c_counts_x :~ Map = {}) (c: [c, ...]):
+          let c_counts :~ Map = c_counts_x // workaround for Racket 8.11
           unless c | game_error("missing buy for a player")
           skip_when c == pass
           c_counts ++ { c: c_counts.get(c, 0) + 1 }

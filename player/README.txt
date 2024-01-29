@@ -1,6 +1,6 @@
 Install Rhombus as
 
- raco pkg install  "https://github.com/mflatt/rhombus-prototype.git#anipict3
+ raco pkg install "https://github.com/mflatt/rhombus-prototype.git#anipict3"
 
 to get the "anipict3" branch.
 
