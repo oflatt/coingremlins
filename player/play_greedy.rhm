@@ -29,8 +29,8 @@ recur loop():
           skip_when get_level(me.cards[i].card) < best_level
           i
     | phase :: Buy:
-        let candidates = possible_buy_moves(s, me).remove("Pass")
-        let canddiate:
+        let candidates = possible_buy_moves(s, me)
+        let candidates:
           for List (card_name: candidates):
             skip_when card_name == "Pass"
             skip_when s.shop[lookup_card(card_name)] == 0
