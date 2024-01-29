@@ -5,6 +5,7 @@ import:
   pict
   lib("pict/main.rkt") as rkt
   lib("racket/base.rkt") as rkt_base
+  lib("racket/tcp.rkt") as rkt_tcp
   lib("racket/gui/base.rkt") as rkt_gui
   "state.rhm" open
   "income.rhm" open
@@ -17,6 +18,18 @@ let s = income(s)
 let s = start_investing(s)
 let content = gui.Obs(#false)
 let graphic = gui.Obs(#false)
+
+match rkt_base.#{current-command-line-arguments}()
+| Array(): #void
+| Array(server, port, id, players, player_index):
+    let (i, o): rkt_tcp.#{tcp-connect}(server, String.to_int(port))
+    println(id, o)
+    println(players, o)
+    println(player_index, o)
+    Port.Output.flush(o)
+    Port.Input.current(i)
+    Port.Output.current(o)
+| bad: error("bad arguments " +& bad)
 
 fun render_to_size(vs :: ViewState, w, h):
   let view = game_view(vs)
@@ -101,13 +114,18 @@ fun on_mouse(ev :: gui.MouseEvent, area :: gui.CanvasContext):
             for values(new_vs :~ ViewState = new_vs) (p: vs.s.players,
                                                       p_vs: vs.players,
                                                       i: 0..):
-              let new_p_vs:
-                for values(new_p_vs :~ PlayerViewState = p_vs) (b_v: view.players[i].buttons):
+              let (new_p_vs, answer):
+                for values(new_p_vs :~ PlayerViewState = p_vs, answer = #false) (b_v: view.players[i].buttons):
                   if b_v.clicking == p_vs.clicking && is_hit(b_v.pict)
-                  | json.write([b_v.action()]) // effect!
-                    new_p_vs with (clicking = #false)
-                  | new_p_vs
-              new_vs with (players = new_vs.players.set(i, new_p_vs))
+                  | values(new_p_vs with (clicking = #false),
+                           [b_v.action()])
+                  | values (new_p_vs, answer)
+              let new_vs:
+                new_vs with (players = new_vs.players.set(i, new_p_vs))
+              if answer
+              | json.write(answer)
+                new_vs with (waiting = #true)
+              | new_vs                
           when (new_vs != vs) | content.value := new_vs
       | #'motion:
           let new_vs = vs

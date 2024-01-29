@@ -10,8 +10,6 @@ import:
       rectangle
       circle
       text
-  slideshow:
-    expose:
       table
   "utils.rhm" open
   "state.rhm" open
@@ -52,7 +50,8 @@ class.together:
   class ViewState(s :: State,
                   player_index :: maybe(Int),
                   ~selected_shop_card: selected_shop_card :: maybe(Card) = #false,
-                  ~players: players :: List.of(PlayerViewState) = State.players(s).map(fun (p): PlayerViewState()))
+                  ~players: players :: List.of(PlayerViewState) = State.players(s).map(fun (p): PlayerViewState()),
+                  ~waiting: waiting = #false)
   class PlayerViewState(~selected_card_index: selected_card_index :: maybe(Int) = #false,
                         ~selected_coins: selected_coins :: maybe(Int) = #false,
                         ~coins_dir: coins_dir :: matching(#'up || #'down) = #'up,
@@ -98,7 +97,7 @@ fun shop_pict(vs :: ViewState) :~ Pict:
 
 fun player_buttons(vs :: ViewState, player_index, mode):
   let (button_label, action, pass_label, pass_action, halign):
-    match mode
+    match !vs.waiting && mode
     | #'investing:
         let amt = vs.players[vs.player_index].selected_coins || 0        
         values("Invest " +& (vs.players[vs.player_index].selected_coins || 0) +& " Coins",

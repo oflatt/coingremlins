@@ -64,12 +64,12 @@ fun drive_game(number_of_players :: Int,
                    select_defender_card(s, i, card_index)
             let s = advance_attacker(s)
             if winner_index(s)
-            | s
+            | game_over(s)
             | attacking_loop(s)
 
   fun buy_phase(s):
     let s = start_buy(s)
-    let s:
+    let s :~ State:
       recur buy_loop(s :~ State = s):
         if (for all (p: s.players):
               p.buys == 0)
@@ -85,12 +85,16 @@ fun drive_game(number_of_players :: Int,
                   s
           let s = end_buy(s)
           if winner_index(s)
-          | s
+          | game_over(s)
           | buy_loop(s)
     if winner_index(s)
-    | s
+    | game_over(s)
     | income_phase(new_day(s))    
 
+  fun game_over(s :~ State):
+    values(s with (phase = End(winner_index(s))),
+           s.data)
+        
   let s = make_game(number_of_players,
                     ~simple: simple,
                     ~data: data)
@@ -108,7 +112,7 @@ fun drive_stdio_game(player_exes :: List.of(Path),
       rkt.thread(fun (): rkt_port.#{copy-port}(err, Port.Output.current_error()))
       Process(handle, in, out)
 
-  let final_s :~ State:
+  let (final_s :~ State, _):
     drive_game(procs.length(),
                fun (s :: State, player_index, data):
                  let s_map = state_to_map(s) ++ { #'player: player_index }
@@ -123,7 +127,7 @@ fun drive_stdio_game(player_exes :: List.of(Path),
                     player_error("move is not in an array: " +& to_string(move, ~mode: #'expr)),
                ~simple: simple)
 
-  let final_map = state_to_map(final_s with (phase = End(winner_index(final_s))))
+  let final_map = state_to_map(final_s)
   json.write(final_map)
   for (player_index: 0 .. procs.length()):
     json.write(final_map ++ { #'player: player_index }, procs[player_index].in)
