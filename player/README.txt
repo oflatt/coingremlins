@@ -8,6 +8,7 @@ Then, use `make` to create or compile
 
  play_random  # a player
  play_greedy  # a player
+ play_gui     # a player where you provide moves through a GUI
  game.rhm     # the game driver
  slide.rhtm   # a game visualizer
 

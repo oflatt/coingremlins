@@ -1,0 +1,148 @@
+#lang rhombus/static
+import:
+  rhombus/gui
+  rhombus/draw
+  pict
+  lib("pict/main.rkt") as rkt
+  lib("racket/base.rkt") as rkt_base
+  lib("racket/gui/base.rkt") as rkt_gui
+  "state.rhm" open
+  "income.rhm" open
+  "investing.rhm" open
+  "pict.rhm" open
+  "json.rhm"
+
+let s = make_game(2)
+let s = income(s)
+let s = start_investing(s)
+let content = gui.Obs(#false)
+let graphic = gui.Obs(#false)
+
+fun render_to_size(vs :: ViewState, w, h):
+  let view = game_view(vs)
+  let p = view.pict
+  let s = math.min((w - 20) / p.width, (h - 20) / p.height)
+  let p = p.scale(s)
+  let dx = (w - p.width) / 2
+  let dy = (h - p.height) / 2
+  [view, p, dx, dy]
+
+fun draw(dc :: draw.DC, content):
+  when content
+  | let draw.Size(w, h) = dc.size
+    let [view, p, dx, dy] = render_to_size(content, w, h)
+    rkt.#{draw-pict}(p, dc.handle, dx, dy)
+
+fun on_mouse(ev :: gui.MouseEvent, area :: gui.CanvasContext):
+  match content.value
+  | #false: #void
+  | vs :: ViewState:
+      let draw.Size(w, h) = area.client_size
+      let [view :~ View, p, dx, dy] = render_to_size(content.value, w, h)
+      fun is_hit(cp):
+        let (cl, ct) = pict.Find.left_top(cp).in(p)
+        let (cr, cb) = pict.Find.right_bottom(cp).in(p)
+        ev.x >= cl+dx && ev.x <= cr+dx && ev.y >= ct+dy && ev.y <= cb+dy                    
+      match ev.kind
+      | #'left_down:
+          let new_vs = vs
+          let mode = state_mode(vs.s, vs.player_index) 
+          let new_vs:
+            for values(new_vs :~ ViewState = new_vs) (p: vs.s.players,
+                                                      p_vs: vs.players,
+                                                      p_v: view.players,
+                                                      i: 0..):
+              let new_p_vs = p_vs with (clicking = #false)
+              let new_p_vs:
+                cond
+                | mode == #'investing && vs.player_index == i && is_hit(p_v.coins):
+                    let coins = p_vs.selected_coins
+                    let coins_dir = p_vs.coins_dir
+                    let new_coins_dir:
+                      cond
+                      | coins == 0: #'up
+                      | coins == p.coins: #'down
+                      | ~else: coins_dir
+                    let new_coins = math.min(p.coins, math.max(0, (coins || 0) + (if new_coins_dir == #'up | 1 | -1)))
+                    new_p_vs with (selected_coins = new_coins,
+                                   coins_dir = new_coins_dir)
+                | ~else:
+                    new_p_vs
+              let new_p_vs:
+                if (mode == #'attacking || mode == #'defending) && vs.player_index == i
+                | for values(new_p_vs :~ PlayerViewState = new_p_vs) (c: p_v.cards,
+                                                                      j: 0..):
+                    if is_hit(c)
+                    | new_p_vs with (selected_card_index = (if new_p_vs.selected_card_index == j
+                                                            | #false
+                                                            | j))
+                    | new_p_vs
+                | new_p_vs
+              let new_p_vs:
+                for values(new_p_vs :~ PlayerViewState = new_p_vs) (b_v: p_v.buttons):
+                  if b_v.clicking && is_hit(b_v.pict)
+                  | new_p_vs with (clicking = b_v.clicking)
+                  | new_p_vs
+              new_vs with (players = new_vs.players.set(i, new_p_vs))
+          let new_vs:
+            if mode == #'buy
+            | for values(new_vs :~ ViewState = new_vs) ((c, n): vs.s.shop):
+                let cp = card_picts[c]
+                if is_hit(cp)
+                | new_vs with (selected_shop_card = (if new_vs.selected_shop_card == c
+                                                     | #false
+                                                     | c))
+                | new_vs
+            | new_vs
+          when (new_vs != vs) | content.value := new_vs
+      | #'left_up:
+          let new_vs = vs
+          let new_vs:
+            for values(new_vs :~ ViewState = new_vs) (p: vs.s.players,
+                                                      p_vs: vs.players,
+                                                      i: 0..):
+              let new_p_vs:
+                for values(new_p_vs :~ PlayerViewState = p_vs) (b_v: view.players[i].buttons):
+                  if b_v.clicking == p_vs.clicking && is_hit(b_v.pict)
+                  | json.write([b_v.action()]) // effect!
+                    new_p_vs with (clicking = #false)
+                  | new_p_vs
+              new_vs with (players = new_vs.players.set(i, new_p_vs))
+          when (new_vs != vs) | content.value := new_vs
+      | #'motion:
+          let new_vs = vs
+          let new_vs:
+            for values(new_vs :~ ViewState = new_vs) (p: vs.s.players,
+                                                      p_vs: vs.players,
+                                                      i: 0..):
+              let new_p_vs:
+                for values(new_p_vs :~ PlayerViewState = p_vs) (b_v: view.players[i].buttons):
+                  cond
+                  | !ev.is_dragging():
+                      new_p_vs with (clicking = #false)
+                  | p_vs.clicking == [b_v.clicking] && is_hit(b_v.pict):
+                      new_p_vs with (clicking = b_v.clicking)
+                  | p_vs.clicking == b_v.clicking && !is_hit(b_v.pict):
+                      new_p_vs with (clicking = [b_v.clicking])
+                  | ~else: new_p_vs
+              new_vs with (players = new_vs.players.set(i, new_p_vs))
+          when (new_vs != vs) | content.value := new_vs
+      | ~else:
+          #void
+
+def canvas:
+  gui.Canvas(content, draw,
+             ~mouse: on_mouse)
+
+block:
+  gui.render(gui.Window(canvas,
+                        ~size: [800, 600]))
+
+  rkt_base.thread(fun ():
+                    recur loop ():
+                      let map :~ Map = json.read()
+                      let s = map_to_state(map)
+                      rkt_gui.#{queue-callback}(fun ():
+                                                  content.value := ViewState(s, map[#'player]))
+                      loop())
+  #void

@@ -107,30 +107,36 @@ fun drive_stdio_game(player_exes :: List.of(Path),
       let (handle, out, in, err) = rkt.subprocess(#false, #false, #false, exe)
       rkt.thread(fun (): rkt_port.#{copy-port}(err, Port.Output.current_error()))
       Process(handle, in, out)
-  drive_game(procs.length(),
-             fun (s :: State, player_index, data):
-               let s_map = state_to_map(s) ++ { #'player: player_index }
-               json.write(s_map)
-               json.write(s_map, procs[player_index].in)
-               let move = json.read(procs[player_index].out)
-               json.write(move)
-               match move
-               | [move]:
-                  values(move, data)
-               | ~else:
-                  player_error("move is not in an array: " +& to_string(move, ~mode: #'expr)),
-             ~simple: simple)
 
+  let final_s :~ State:
+    drive_game(procs.length(),
+               fun (s :: State, player_index, data):
+                 let s_map = state_to_map(s) ++ { #'player: player_index }
+                 json.write(s_map)
+                 json.write(s_map, procs[player_index].in)
+                 let move = json.read(procs[player_index].out)
+                 json.write(move)
+                 match move
+                 | [move]:
+                    values(move, data)
+                 | ~else:
+                    player_error("move is not in an array: " +& to_string(move, ~mode: #'expr)),
+               ~simple: simple)
+
+  let final_map = state_to_map(final_s with (phase = End(winner_index(final_s))))
+  json.write(final_map)
+  for (player_index: 0 .. procs.length()):
+    json.write(final_map ++ { #'player: player_index }, procs[player_index].in)
+  
 module main:
   import:
     lib("racket/base.rkt") as rkt
-  fun finish(s): json.write(state_to_map(s))
   match rkt.#{current-command-line-arguments}()
   | Array(): #void
   | Array("--base", exe, ...):
-      finish(drive_stdio_game([Path(exe), ...], ~simple: #false))
+      drive_stdio_game([Path(exe), ...], ~simple: #false)
   | Array(exe, ...):
-      finish(drive_stdio_game([Path(exe), ...]))
+      drive_stdio_game([Path(exe), ...])
 
 module test:
   drive_game(

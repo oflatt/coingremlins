@@ -53,4 +53,4 @@ fun winning_investment(s :: State) :: maybe(Int):
   winner != #'none && winner
 
 fun possible_investing_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
-  for List (i: 0..p.coins): i
+  for List (i: 0..p.coins+1): i

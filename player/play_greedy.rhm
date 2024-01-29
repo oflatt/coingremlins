@@ -8,37 +8,40 @@ import:
 
 recur loop():
   let s_json :~ Map = json.read()
-  unless s_json == Port.eof
-  | let s = map_to_state(s_json)
-    let me_index = s_json[#'player]
-    let me = s.players[me_index]
-    let candidate_moves :~ List:
-      match s.phase
-      | phase :: Investing:
-          if random(1) == 0
-          | possible_investing_moves(s, me)
-          | [0]
-      | phase :: Attacking:
-          let (candidates :~ List, get_level):            
-            if (phase.attacker_index == me_index)
-            | values(possible_attacking_moves(s, me).remove(0),
-                     fun (card :~ Card): card.attack_level)
-            | values(possible_defending_moves(s, me),
-                     fun (card :~ Card): card.defense_level)
-          let best_level = math.max(& for List (i: candidates): get_level(me.cards[i].card))
-          for List (i: candidates):
-            skip_when get_level(me.cards[i].card) < best_level
-            i
-      | phase :: Buy:
-          let candidates = possible_buy_moves(s, me).remove("Pass")
-          let canddiate:
-            for List (card_name: candidates):
-              skip_when card_name == "Pass"
-              skip_when s.shop[lookup_card(card_name)] == 0
-              card_name
-          if candidates.length() == 0
-          | ["Pass"]
-          | candidates
-    let move = candidate_moves[random(candidate_moves.length())]
+  let s = map_to_state(s_json)
+  let me_index = s_json[#'player]
+  let me = s.players[me_index]
+  let candidate_moves :~ List:
+    match s.phase
+    | phase :: Investing:
+        if random(1) == 0
+        | possible_investing_moves(s, me)
+        | [0]
+    | phase :: Attacking:
+        let (candidates :~ List, get_level):            
+          if (phase.attacker_index == me_index)
+          | values(possible_attacking_moves(s, me).remove(0),
+                   fun (card :~ Card): card.attack_level)
+          | values(possible_defending_moves(s, me),
+                   fun (card :~ Card): card.defense_level)
+        let best_level = math.max(& for List (i: candidates): get_level(me.cards[i].card))
+        for List (i: candidates):
+          skip_when get_level(me.cards[i].card) < best_level
+          i
+    | phase :: Buy:
+        let candidates = possible_buy_moves(s, me).remove("Pass")
+        let canddiate:
+          for List (card_name: candidates):
+            skip_when card_name == "Pass"
+            skip_when s.shop[lookup_card(card_name)] == 0
+            card_name
+        if candidates.length() == 0
+        | ["Pass"]
+        | candidates
+    | phase :: End:
+        []
+  let n = candidate_moves.length()
+  unless n == 0
+  | let move = candidate_moves[random(n)]
     json.write([move])
     loop()
