@@ -127,6 +127,7 @@ fun advance_attacker(s :: State) :~ State:
           | ~else:
               let defender_card_index = defender_card_indexes[i]
               let defender_card = p.cards[defender_card_index].card
+              let p = p with (coins  = defender_card.defend_coins(p.coins))
               cond
               | !defender_card.defense_level:
                   p with (cards = [],
