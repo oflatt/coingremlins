@@ -13,14 +13,14 @@ recur loop():
     let me_index = s_json[#'player]
     let me = s.players[me_index]
     let candidate_moves :~ List:
-      match s.step
-      | step :: Investing:
+      match s.phase
+      | phase :: Investing:
           if random(1) == 0
           | possible_investing_moves(s, me)
           | [0]
-      | step :: Attacking:
+      | phase :: Attacking:
           let (candidates :~ List, get_level):            
-            if (step.attacker_index == me_index)
+            if (phase.attacker_index == me_index)
             | values(possible_attacking_moves(s, me).remove(0),
                      fun (card :~ Card): card.attack_level)
             | values(possible_defending_moves(s, me),
@@ -29,7 +29,7 @@ recur loop():
           for List (i: candidates):
             skip_when get_level(me.cards[i].card) < best_level
             i
-      | step :: Buy:
+      | phase :: Buy:
           let candidates = possible_buy_moves(s, me).remove("Pass")
           let canddiate:
             for List (card_name: candidates):

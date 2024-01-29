@@ -58,7 +58,7 @@ fun drive_game(number_of_players :: Int,
                                          i: 0..):
                cond
                | i == attacker_index: s
-               | Attacking.defender_card_indexes(s.step)[i] == 0: s
+               | Attacking.defender_card_indexes(s.phase)[i] == 0: s
                | ~else:
                    let (s, card_index) = get_move(s, i, is_NonnegInt)
                    select_defender_card(s, i, card_index)

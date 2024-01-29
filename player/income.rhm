@@ -8,8 +8,8 @@ export:
   income
 
 fun income(s :: State) :~ State:
-  unless s.step is_a Income
-  | game_error("not at income step")
+  unless s.phase is_a Income
+  | game_error("not at income phase")
   let new_players:
     for List (p: s.players):
       let new_coins:

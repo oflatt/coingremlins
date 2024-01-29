@@ -131,9 +131,9 @@ fun player_view(vs :: ViewState, player_index) :~ PlayerView:
   let p = vs.s.players[player_index]
   let player_vs = vs.players[player_index]
   let attacking_card_index:
-    match vs.s.step
-    | step :: Attacking:
-        step.attacker_index == player_index && step.attacker_card_index
+    match vs.s.phase
+    | phase :: Attacking:
+        phase.attacker_index == player_index && phase.attacker_card_index
     | ~else:
         #false
   let cards:
@@ -145,9 +145,9 @@ fun player_view(vs :: ViewState, player_index) :~ PlayerView:
         | highlight_card_pict(cp, ~as_attacker: attacking_card_index == i)
         | cp
       let cp:
-        match vs.s.step
-        | step :: Attacking:
-            if bc.uses > 0 && (if step.attacker_index == player_index
+        match vs.s.phase
+        | phase :: Attacking:
+            if bc.uses > 0 && (if phase.attacker_index == player_index
                                | i != attacking_card_index && bc.uses >= bc.card.num_attacks
                                | bc.uses >= bc.card.num_defends)
             | cp.rotate(math.pi * 1/2)
@@ -184,16 +184,16 @@ fun player_view(vs :: ViewState, player_index) :~ PlayerView:
      ++ (if pass && !action | [ButtonView(pass, pass_action)] | [])]
 
 fun state_mode(s :: State, player_index :: maybe(Int)):
-  match s.step
-  | step :: Investing:
+  match s.phase
+  | phase :: Investing:
       #'investing
-  | step :: Attacking:
+  | phase :: Attacking:
       if player_index
-      | if step.attacker_index == player_index
+      | if phase.attacker_index == player_index
         | #'attacking
         | #'defending
       | #'other
-  | step :: Buy:
+  | phase :: Buy:
       #'buy
   | ~else:
       #'other  
