@@ -12,12 +12,12 @@ export:
   possible_investing_moves
 
 fun start_investing(s :: State) :~ State:
-  unless s.step is_a Income
+  unless s.phase is_a Income
   | game_error("investment must start after income")
-  s with (step = Investing(s.players.map(fun (p :~ Player):
-                                           if p.cards == []
-                                           | 0
-                                           | #false)))
+  s with (phase = Investing(s.players.map(fun (p :~ Player):
+                                            if p.cards == []
+                                            | 0
+                                            | #false)))
 
 fun add_investment(s :: State,
                    player_index :: Int,
@@ -25,20 +25,20 @@ fun add_investment(s :: State,
   let p = s.players[player_index]
   if coins > p.coins
   | player_error("player attempted to invest more coins than they have")
-  | match s.step
+  | match s.phase
     | Investing(investments):
         when investments[player_index] | game_error("player already has an investment")
-        s with (step = Investing(investments.set(player_index, coins)))
+        s with (phase = Investing(investments.set(player_index, coins)))
 
 fun apply_investments(s :: State) :~ State:
-  match s.step
+  match s.phase
   | Investing(investments):
       s with (players = (for List (p: s.players,
                                    investment: investments):
                            p with (coins = p.coins - investment)))                       
 
 fun winning_investment(s :: State) :: maybe(Int):
-  let investments = Investing.investments(s.step)
+  let investments = Investing.investments(s.phase)
   unless (for all (investment: investments): investment)
   | game_error("not all players have invested")
   let max_investment = math.max(& investments)
@@ -53,4 +53,4 @@ fun winning_investment(s :: State) :: maybe(Int):
   winner != #'none && winner
 
 fun possible_investing_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
-  for List (i: 0..p.coins): i
+  for List (i: 0..p.coins+1): i

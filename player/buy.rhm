@@ -11,12 +11,12 @@ export:
   possible_buy_moves
 
 fun start_buy(s :: State) :~ State:
-  unless s.step is_a (Investing || Attacking)
+  unless s.phase is_a (Investing || Attacking)
   | game_error("buy must start after investing or attacking")
-  s with (step = Buy(0, s.players.map(fun (p :~ Player):
-                                        if p.cards == []
-                                        | pass
-                                        | #false)))
+  s with (phase = Buy(s.players.map(fun (p :~ Player):
+                                      if p.cards == []
+                                      | pass
+                                      | #false)))
 
 fun add_buy(s :: State,
             player_index :: Int,
@@ -34,8 +34,8 @@ fun add_buy(s :: State,
   when c != pass && c.cost > p.coins
   | player_error("player does not have enough coins to buy card")
   
-  match s.step
-  | Buy(step, buy_cards) && buy:
+  match s.phase
+  | Buy(buy_cards) && buy:
       when buy_cards[player_index]
       | game_error("player already used this buy")
 
@@ -45,13 +45,14 @@ fun add_buy(s :: State,
       let new_buy:
         buy with (buy_cards = buy_cards.set(player_index, c))
 
-      s with (step = new_buy)
+      s with (phase = new_buy)
 
 fun end_buy(s :: State) :~ State:
-  match s.step
-  | Buy(step, [c :~ Card, ...]):
+  match s.phase
+  | Buy([c :~ Card, ...]):
       let c_counts:
-        for values(c_counts :~ Map = {}) (c: [c, ...]):
+        for values(c_counts_x :~ Map = {}) (c: [c, ...]):
+          let c_counts :~ Map = c_counts_x // workaround for Racket 8.11
           unless c | game_error("missing buy for a player")
           skip_when c == pass
           c_counts ++ { c: c_counts.get(c, 0) + 1 }
@@ -76,10 +77,10 @@ fun end_buy(s :: State) :~ State:
 
       s with (shop = new_shop,
               players = new_players,
-              step = Buy(step+1, new_players.map(fun (p :~ Player):
-                                                   if p.buys == 0
-                                                   | pass
-                                                   | #false)))
+              phase = Buy(new_players.map(fun (p :~ Player):
+                                           if p.buys == 0
+                                           | pass
+                                           | #false)))
 fun possible_buy_moves(s :: State, p :: Player) :~ List.of(String):
   let card_names:
     for List ((c, n): s.shop):

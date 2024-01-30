@@ -5,4 +5,4 @@
 bindir="/Users/mflatt/plt/racket/bin"
 # }}} bindir
 
-exec "${bindir}/racket" -N "$0" '-t' '/Users/mflatt/repo/mflatt/cs6525/economancy/play_random.rhm' '-U' '--'  ${1+"$@"}
+exec "${bindir}/racket" -N "$0" '-t' '/Users/mflatt/repo/oflatt/economancy/player/play_random.rhm' '-U' '--'  ${1+"$@"}
