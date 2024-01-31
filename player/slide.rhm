@@ -1,0 +1,52 @@
+#lang rhombus/static/and_meta
+import:
+  slideshow.slide
+  slideshow.retract_recent_slide
+  pict.Pict
+  "state.rhm" open
+  "card.rhm" open
+  "pict.rhm" open
+  "json.rhm"
+
+fun fit_on_screen(p :~ Pict):
+  let s = math.min((1360-40) / p.width, (766-40) / p.height)
+  if s < 1
+  | p.scale(s)
+  | p
+
+recur loop(v = json.read()):
+  unless v == Port.eof
+  | let v :: Map = v
+    let s = map_to_state(v)
+    let player_index = v.get(#'player, #false)
+    let vs = ViewState(s, player_index)
+    let view = game_view(vs)
+    slide(fit_on_screen(view.pict))
+
+    let next_v = json.read()
+    if next_v is_a Map || next_v == Port.eof
+    | loop(next_v)
+    | let [next_v] = next_v // remove JSON array wrapper
+      let vs:
+        cond
+        | next_v is_a String:
+            if next_v != "Pass"
+            | vs with (selected_shop_card = lookup_card(next_v))
+            | vs
+        | ~else:
+            match state_mode(s, player_index)
+            | #'investing:
+                let new_p_vs:
+                  vs.players[player_index] with (selected_coins = next_v)
+                vs with (players = vs.players.set(player_index, new_p_vs))
+            | #'attacking || #'defending:
+                if next_v != 0 // 0 means "pass"
+                | let new_p_vs:
+                    vs.players[player_index] with (selected_card_index = next_v)
+                  vs with (players = vs.players.set(player_index, new_p_vs))
+                | vs
+            | ~else:
+                vs
+      retract_recent_slide()
+      slide(fit_on_screen(game_view(vs).pict))
+      loop(json.read())

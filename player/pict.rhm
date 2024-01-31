@@ -1,0 +1,252 @@
+#lang rhombus/static/and_meta
+import:
+  rhombus/runtime_path
+  pict:
+    expose:
+      Pict
+      overlay
+      beside
+      above
+      rectangle
+      circle
+      text
+      table
+  "utils.rhm" open
+  "state.rhm" open
+  "winner.rhm" open
+  "card.rhm" open
+  "phase.rhm" open
+  meta:
+    lib("racket/base.rkt") as rkt
+
+export:
+  card_picts
+  game_view
+
+  ViewState
+  PlayerViewState
+  
+  View
+  PlayerView
+  ButtonView
+
+  state_mode
+
+defn.macro 'pict_table $id':
+  let [[sym, str], ...] = card_meta_list
+  let [path_name, ...] = [Syntax.make_temp_id(sym), ...]
+  fun fixup(name): "../docs/base-game/" ++ rkt.#{regexp-replace}(#{#rx"'"}, name, "_") ++ ".png"
+  let [str, ...] = [fixup(str), ...]
+  'runtime_path.def $path_name: $str
+   ...
+   def $id :~ Map.of(Card, Pict):
+     { $(Syntax.make(sym, id)) : pict.bitmap($path_name).scale(0.1),
+       ... }'
+
+pict_table card_picts 
+
+class.together:
+  // game stat plus GUI state
+  class ViewState(s :: State,
+                  player_index :: maybe(Int),
+                  ~selected_shop_card: selected_shop_card :: maybe(Card) = #false,
+                  ~players: players :: List.of(PlayerViewState) = State.players(s).map(fun (p): PlayerViewState()),
+                  ~waiting: waiting = #false)
+  class PlayerViewState(~selected_card_index: selected_card_index :: maybe(Int) = #false,
+                        ~selected_coins: selected_coins :: maybe(Int) = #false,
+                        ~coins_dir: coins_dir :: matching(#'up || #'down) = #'up,
+                        ~clicking: clicking :: matching(#'go || #'pass) || Any = #false)
+
+  // rendered game as pict and subpicts
+  class View(~pict: pict :: Pict,
+             ~players: players :: List.of(PlayerView))
+  class PlayerView(~pict: pict :: Pict,
+                   ~cards: cards :: List.of(Pict),
+                   ~coins: coins :: Pict,
+                   ~buttons: buttons :: List.of(ButtonView))
+  class ButtonView(pict :: Pict,
+                   action :: Function,
+                   clicking :: maybe(matching(#'go || #'pass)))
+
+fun highlight_card_pict(p, ~as_attacker = #false) :~ Pict:
+  rectangle(~around: p, ~line_width: 5, ~line: if as_attacker | "red" | "blue")
+
+fun shop_pict(vs :: ViewState) :~ Pict:
+  def shop_piles:
+    for List (c: all_cards):
+      skip_when !vs.s.shop.get(c, #false)
+      let cp = card_picts[c]
+      let cp:
+        cond
+        | vs.s.shop[c] == 0:
+            // would write cp.fade(0.3), but work around a Cairo bug in PDF generation
+            overlay(cp, rectangle(cp, cp, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
+        | ~else: cp
+      let p:
+        above(cp,
+              text(to_string(vs.s.shop[c]))).refocus(cp)
+      cond
+      | vs.selected_shop_card == c: highlight_card_pict(p)
+      | ~else: p
+  table(recur loop (l :~ List = shop_piles):
+          if l.length() <= 5
+          | [l ++ (for List (i: 0 .. 5-l.length()): (l[0] :~ pict.Pict).ghost())]
+          | [l.take_left(5)] ++ loop(l.drop_left(5)),
+        ~vsep: 20,
+        ~hsep: 10)
+
+fun player_buttons(vs :: ViewState, player_index, mode):
+  let (button_label, action, pass_label, pass_action, halign):
+    match !vs.waiting && mode
+    | #'investing:
+        let amt = vs.players[vs.player_index].selected_coins || 0        
+        values("Invest " +& (vs.players[vs.player_index].selected_coins || 0) +& " Coins",
+               possible_investing_moves(vs.s, vs.s.players[player_index]).has_element(amt)
+                 && fun (): amt,
+               #false,
+               #false,
+               #'left)
+    | #'attacking || #'defending:
+        let card_index = vs.players[vs.player_index].selected_card_index
+        values((if mode == #'attacking | "Attack" | "Defend")
+                 +& " with "
+                 +& (if card_index
+                     | vs.s.players[vs.player_index].cards[card_index].card.name
+                     | ""),
+               card_index
+                 && (if mode == #'attacking
+                     | card_index != 0 // 0 means to stop attacking
+                         && possible_attacking_moves(vs.s, vs.s.players[player_index]).has_element(card_index)
+                     | possible_defending_moves(vs.s, vs.s.players[player_index]).has_element(card_index))
+                 && fun (): card_index,
+               "End Attack",
+               mode == #'attacking && fun (): 0, // 0 means "Pass"
+               #'center)
+    | #'buy:
+        let card_name = if vs.selected_shop_card | Card.name(vs.selected_shop_card) | ""
+        values("Buy " +& card_name,
+               vs.selected_shop_card
+                 && possible_buy_moves(vs.s, vs.s.players[player_index]).has_element(card_name)
+                 && fun (): Card.name(vs.selected_shop_card),
+               "Pass",
+               fun (): "Pass",
+               #'left)
+    | ~else:
+        values("Waiting", #false, #false, #false, #'center)
+  fun button_pict(label, action, clicking):
+    let is_clicking = vs.players[player_index].clicking == clicking
+    rectangle(~around: text(label).fade(if action | 1 | 0.5).inset(10, 5)
+                         .colorize(if is_clicking | "white" | "black"),
+              ~line: if action | "blue" | "gray",
+              ~fill: if action
+                     | if is_clicking
+                       | "cadetblue"
+                       | "lightblue"
+                     | "white")
+  let button = button_pict(button_label, action, #'go)
+  let pass = pass_action && button_pict(pass_label, !action && pass_action, #'pass)
+  values (button, action, pass, pass_action, halign)
+
+fun player_view(vs :: ViewState, player_index) :~ PlayerView:
+  let p = vs.s.players[player_index]
+  let player_vs = vs.players[player_index]
+  let mode:
+    if vs.player_index == player_index
+    | state_mode(vs.s, vs.player_index)
+    | #'other
+  let attacking_card_index:
+    match vs.s.phase
+    | phase :: Attacking:
+        phase.attacker_index == player_index && phase.attacker_card_index
+    | ~else:
+        #false
+  let cards:
+    for List (bc: p.cards,
+              i: 0..):
+      let cp = card_picts[bc.card]
+      let cp :~ Pict:
+        if player_vs.selected_card_index == i || attacking_card_index == i
+        | highlight_card_pict(cp, ~as_attacker: attacking_card_index == i)
+        | cp
+      let cp :~ Pict:
+        match vs.s.phase
+        | phase :: Attacking:
+            if bc.uses > 0 && (if phase.attacker_index == player_index
+                               | i != attacking_card_index && bc.uses >= bc.card.num_attacks
+                               | bc.uses >= bc.card.num_defends)
+            | cp.rotate(math.pi * 1/2)
+            | cp
+        | ~else: cp
+      cp.launder()
+  let hand:
+    beside(~sep:10, & cards)
+  let coins:
+    above(~sep: 10,
+          block:
+            let c = circle(30, ~fill: "gold", ~line: "gray")
+            let n = player_vs.selected_coins || (mode == #'investing && 0)
+            if n
+            | overlay(c, text(to_string(n)))
+            | c,
+          text(to_string(p.coins)))
+  let p = beside(~sep: 20, coins, hand)
+  let p = overlay(~halign: #'left, p, pict.blank(card_picts[stipend].width * 4, 0))
+
+  let (button :~ Pict, action, pass, pass_action, halign) = player_buttons(vs, player_index, mode)
+  let p :~ Pict:
+    let sep = 20
+    cond
+    | !pass:
+        above(~sep: sep, ~halign: halign, p, button)
+    | halign != #'center || button.width/2 + Pict.width(pass) + sep < p.width/2:
+        let p: above(~sep: sep, ~halign: halign, p, button)
+        overlay(~valign: #'bottom, ~halign: #'right, p, pass)
+    | ~else:
+        above(~sep: sep, ~halign: #'right, p,
+              beside(~sep: sep, button, pass))
+  PlayerView(
+    ~pict: rectangle(~around: p.inset(20),
+                     ~fill: if player_index == winner_index(vs.s) | "yellow" | #false,
+                     ~line_width: if player_index == vs.player_index | 3 | 1,
+                     ~line: if player_index == vs.player_index | "green" | "black"),
+    ~cards: cards,
+    ~coins: coins,
+    ~buttons:
+      ((if action | [ButtonView(button, action, #'go)] | []) :~ List)
+        ++ (if pass && !action | [ButtonView(pass, pass_action, #'pass)] | [])
+  )
+
+fun state_mode(s :: State, player_index :: maybe(Int)):
+  match s.phase
+  | phase :: Investing:
+      #'investing
+  | phase :: Attacking:
+      if player_index
+      | if phase.attacker_index == player_index
+        | #'attacking
+        | #'defending
+      | #'other
+  | phase :: Buy:
+      #'buy
+  | ~else:
+      #'other  
+
+fun game_view(vs :: ViewState) :~ View:
+  let [player :~ PlayerView, ...]:
+    for List (p: vs.s.players,
+              i: 0..):
+      player_view(vs, i)
+  let day_pict:
+    text("Day " +& vs.s.day).colorize("firebrick").scale(2)
+  let p = beside(~sep: 50,
+                 above(day_pict.ghost(),
+                       shop_pict(vs)),
+                 above(~sep: 20, player.pict, ...))
+  let p = overlay(~valign: #'top,
+                  ~halign: #'left,
+                  p,
+                  day_pict)
+  View(
+    ~pict: p,
+    ~players: [player, ...]
+  )

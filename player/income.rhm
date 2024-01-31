@@ -1,0 +1,27 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "card.rhm" open
+  "state.rhm" open
+
+export:
+  income
+
+fun income(s :: State) :~ State:
+  unless s.phase is_a Income
+  | game_error("not at income phase")
+  let new_players:
+    for List (p: s.players):
+      let new_coins:
+        if p.cards == []
+        | 0
+        | for values(coins = p.coins) (bc: p.cards):
+            bc.card.coins(s.day, coins)
+      let new_buys:
+        if p.cards == []
+        | 0
+        | for values(buys = p.buys + 1) (bc: p.cards):
+            bc.card.buys(s.day, buys)
+      p with (coins = new_coins,
+              buys = new_buys)
+  s with (players = new_players)

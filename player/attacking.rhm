@@ -1,0 +1,154 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "card.rhm" open
+  "state.rhm" open
+
+export:
+  player_can_attack
+  start_attacking
+  end_attacking
+  select_attacker_card
+  select_defender_card
+  advance_attacker
+  possible_attacking_moves
+  possible_defending_moves
+
+fun player_can_attack(p :: Player):
+  for any (c: p.cards):
+    c.card.num_attacks > c.uses
+
+fun start_attacking(s :: State,
+                    attacker_index :: Int) :~ State:
+  unless s.phase is_a Investing
+  | game_error("attacking must start after investing")
+  s with (phase = new_attacking_state(attacker_index, s.players))
+
+fun new_attacking_state(attacker_index, players :~ List):
+  Attacking(attacker_index,
+            #false,
+            players.map(fun (p :~ Player):
+                          if (for all (bc: p.cards):
+                                !bc.card.defense_level || bc.card.num_defends <= bc.uses)
+                          | 0
+                          | #false))
+
+fun end_attacking(s :: State) :~ State:
+  unless s.phase is_a Attacking
+  | game_error("not currently attacking")
+  unless !Attacking.attacker_card_index(s.phase)
+  | game_error("attack is still in progress")
+  s with (players = s.players.map(fun (p :: Player):
+                                    let [bc, ...] = p.cards
+                                    p with (cards = [BoughtCard(bc.card, 0), ...])))
+
+fun select_attacker_card(s :: State,
+                         card_index :: Int) :~ State:
+  match s.phase
+  | Attacking(attacker_index, attacker_card_index, _) && phase:
+      when attacker_card_index
+      | game_error("attacker has already selected an attacker card")
+        
+      let p = s.players[attacker_index]
+      
+      when card_index >= p.cards.length()
+      | player_error("attacker card index is too large")
+
+      let bc = p.cards[card_index]
+
+      when bc.uses >= bc.card.num_attacks
+      | player_error(if bc.card.num_attacks == 0
+                     | "card cannot attack"
+                     | "card for attack is already used to its maximum")
+
+      let new_player:
+        p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
+      let new_phase:
+        phase with (attacker_card_index = card_index)
+
+      s with (phase = new_phase,
+              players = s.players.set(attacker_index, new_player))
+
+fun select_defender_card(s :: State,
+                         player_index :: Int,
+                         card_index :: Int) :~ State:
+  match s.phase
+  | Attacking(attacker_index, _, defender_card_indexes) && phase:
+      when player_index == attacker_index
+      | game_error("defender is the attacker")
+      when defender_card_indexes[player_index]
+      | game_error("defender has already selected a defender card")
+
+      let p = s.players[player_index]
+      
+      when card_index >= p.cards.length()
+      | player_error("defender card index is too large")
+
+      let bc = p.cards[card_index]
+
+      when bc.uses >= bc.card.num_defends
+      | player_error(if bc.card.num_defends == 0
+                     | "card cannot defend"
+                     | "card for defend is already used to its maximum")
+
+      let new_player:
+        p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
+      let new_phase:
+        phase with (defender_card_indexes = defender_card_indexes.set(player_index, card_index))
+
+      s with (phase = new_phase,
+              players = s.players.set(player_index, new_player))
+
+fun advance_attacker(s :: State) :~ State:
+  match s.phase
+  | Attacking(attacker_index, attacker_card_index, defender_card_indexes):
+      unless attacker_index
+      | game_error("attacker card is not selected")
+        
+      let attacker_card = s.players[attacker_index].cards[attacker_card_index].card
+
+      let new_players:
+        for List (p: s.players,
+                  i: 0..):
+          cond
+          | i == attacker_index:
+              if (for any (j: 0..defender_card_indexes.length()):
+                    skip_when i == j
+                    let dp = s.players[j]
+                    skip_when dp.cards == []
+                    let defender_card = dp.cards[defender_card_indexes[j]].card
+                    skip_when !defender_card.attack_level
+                    defender_card.attack_level > attacker_card.defense_level)
+              | p with (cards = p.cards.delete(attacker_card_index))
+              | p
+          | p.cards == []:
+              // already out
+              p
+          | ~else:
+              let defender_card_index = defender_card_indexes[i]
+              let defender_card = p.cards[defender_card_index].card
+              let p = p with (coins  = defender_card.defend_coins(p.coins))
+              cond
+              | !defender_card.defense_level:
+                  p with (cards = [],
+                          coins = 0,
+                          buys = 0)
+              | attacker_card.attack_level > defender_card.defense_level:
+                  p with (cards = p.cards.delete(defender_card_index))
+              | ~else:
+                  p
+
+      s with (players = new_players,
+              phase = new_attacking_state(attacker_index, new_players))
+
+fun possible_attacking_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
+  [0] ++ (for List (bc: p.cards,
+                    i: 0..):
+            skip_when !bc.card.attack_level || bc.uses >= bc.card.num_attacks
+            i)
+
+fun possible_defending_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
+  for List (bc: p.cards,
+            i: 0..):
+    skip_when !bc.card.defense_level || bc.uses >= bc.card.num_defends
+    i

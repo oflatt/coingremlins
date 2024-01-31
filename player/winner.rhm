@@ -1,0 +1,39 @@
+#lang rhombus/static
+import:
+  "utils.rhm" open
+  "card.rhm" open
+  "state.rhm" open
+
+export:
+  player_points
+  winner_index
+
+fun player_points(p :: Player) :: Int:
+  for values(points = 0) (bc: p.cards):
+    points + bc.card.points
+
+fun winner_index(s :: State) :: maybe(Int || matching(#'no_one)):
+  let (alive, alive_index):
+    for values(alive = 0, alive_index = #false) (p: s.players,
+                                                 i: 0..):
+      if p.cards == []
+      | values(alive, alive_index)
+      | values(alive+1, i)
+  cond
+  | alive == 1:
+      alive_index
+  | alive == 0:
+      #'no_one
+  | ~else:
+      let (winner, win_points):
+        for values(winner = #false, win_points = 0) (p: s.players,
+                                                     i: 0..):
+          let points = player_points(p)
+          cond
+          | points > win_points:
+              values(i, points)
+          | points == win_points:
+              values(#'none, points)
+          | ~else:
+              values(winner, win_points)
+      winner != #'none && win_points >= 7 && winner

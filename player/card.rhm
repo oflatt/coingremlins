@@ -1,0 +1,186 @@
+#lang rhombus/static/and_meta
+
+export:
+  Card
+  all_cards
+  all_shop_cards
+  simple_shop_cards
+  lookup_card
+  // individual cards also exported
+  meta:
+    card_meta_list // [[sym, string], ...]
+
+class Card (name :: String,
+            // these are #false if the card cannot participate on
+            // either side of an attack (but a non-#false values
+            // does not mean that `num_arracks` or `num_defends` > 0)
+            attack_level :: maybe(Int), defense_level :: maybe(Int),
+            cost :: maybe(Int), per_player :: Int,
+            ~points: points :: Int = 0,
+            ~coins: coins :: Function = fun (day, money): money,
+            ~buys: buys :: Function = fun (day, buys): buys,
+            ~attacks: num_attacks :: Int = if attack_level | 1 | 0,
+            ~defends: num_defends :: Int = if defense_level | 1 | 0,
+            ~defend_coins: defend_coins :: Function = fun (money): money):
+  implements Printable
+  override describe(mode, recur):
+    "Card(" ++ to_string(name, ~mode: #'expr) ++ ")"
+
+decl.macro 'cards $card_meta_list:
+              $id:
+                Card($name_str, $arg, ...)
+              ...':  
+  'export:
+     $id ...
+   def $id: Card($name_str, $arg, ...)
+   ...
+   meta:
+     def $card_meta_list:
+       [[#'$id, $name_str], ...]'
+
+cards card_meta_list:
+  stipend:
+    Card("Sorcerer's Stipend",
+         #false, #false,
+         #false, 1,
+         ~coins:
+           fun (day, money):
+             if day == 1
+             | money + 2
+             | money + 1,
+         ~attacks: 0,
+         ~defends: 0)
+  pass:
+    Card("Pass",
+         #false, #false,
+         #false, 1)
+
+  monopoly:
+    Card("Board of Monopoly",
+         1, 1,
+         2, 2,
+         ~points: 1)
+  incantation:
+    Card("Incantation",
+         1, 1,
+         4, 3,
+         ~points: 3)
+  wall:
+    Card("Wall of Wealth",
+         1, 2,
+         1, 2,
+         ~coins:
+           fun (day, money):
+             if day == 1
+             | money + 1
+             | money)
+  worker:
+    Card("Worker",
+         1, 2,
+         1, 2,
+         ~coins:
+           fun (day, money):
+             if day == 2 || day == 3
+             | money + 1
+             | money)
+  stock:
+    Card("Magic Bean Stock",
+         1, 1,
+         1, 1,
+         ~coins:
+           fun (day, money):
+             money + (money div 3))
+  bubble:
+    Card("Bubble",
+         9, 2,
+         2, 1,
+         ~attacks: 0)
+  ghost:
+    Card("Ghost",
+         3, 2,
+         2, 2,
+         ~coins:
+           fun (day, money):
+             if day == 3
+             | money + 1
+             | money)
+  senior_worker:
+    Card("Senior Worker",
+         2, 2,
+         2, 2,
+         ~coins:
+           fun (day, money):
+             money + 1)
+  fish:
+    Card("Gold Fish",
+         1, 2,
+         3, 1,
+         ~coins:
+           fun (day, money):
+             if day == 3
+             | money + 4
+             | money)
+  apprentice:
+    Card("Apprentice",
+         2, 1,
+         3, 1,
+         ~coins:
+           fun (day, money):
+             if day == 1 || day == 2
+             | money + 1
+             | money,
+         ~buys:
+           fun (day, buys):
+             if day == 3
+             | buys + 1
+             | buys)
+  thug:
+    Card("Thug",
+         4, 4,
+         3, 1,
+         ~coins:
+           fun (day, money):
+             if day == 2
+             | money + 1
+             | money)
+  shield:
+    Card("Shield of Greed",
+         2, 7,
+         4, 1,
+         ~defend_coins:
+           fun (money):
+             money + 1)
+  golem:
+    Card("Golem",
+         7, 7,
+         5, 1)
+
+def all_shop_cards :~ List.of(Card):
+  [monopoly,
+   incantation,
+   wall,
+   worker,
+   stock,
+   bubble,
+   ghost,
+   senior_worker,
+   fish,
+   apprentice,
+   thug,
+   shield,
+   golem]
+  
+def simple_shop_cards :~ List.of(Card):
+  all_shop_cards
+    .remove(wall)
+    .remove(apprentice)
+    .remove(thug)
+    .remove(shield)
+    .remove(golem)
+
+def all_cards :~ List.of(Card):
+  all_shop_cards ++ [stipend, pass]
+
+fun lookup_card(name :: String) :~ maybe(Card):
+  for any (c: all_cards):
+    c.name == name && c
