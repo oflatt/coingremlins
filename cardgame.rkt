@@ -88,7 +88,7 @@
 
 
 (dcard pass-card  #f  "Pass"       -1 -1 -1 1 "Player chose not to buy a card" "" (list reference-tag not-in-shop-tag every-game-tag))
-(dcard stipend    #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list not-in-shop-tag every-game-tag))
+(dcard stipend    "stipend-adjused.png"   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list not-in-shop-tag every-game-tag))
 (dcard day-tracker #f "Day Tracker" -1 -1 -1 0 "" "Day 1\n\n\nDay 2\n\n\nDay 3"  (list day-tracker-tag not-in-shop-tag every-game-tag))
 (dcard pepper      "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" "" (list victory-tag every-game-tag))
 (dcard pearl      "incantation.png"   "Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag every-game-tag))
