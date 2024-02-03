@@ -58,13 +58,25 @@ class Buy(buy_cards :: List.of(maybe(Card))):
     Buy(players.map(fun (p): #false))
   export unrep
 
-class End(winner_index):
+class End(winner_index ::maybe(Int)):
   extends Phase
   override rep(): {
                     #'name: "end",
                     #'winner: winner_index
                   }
-  fun unrep({#'winner: winner_index}, _): End(winner_index)
+  fun unrep({ #'winner: winner_index }, _): End(winner_index)
+  export unrep
+
+class Fault(forfiet_index :: Int,
+            reason :: String):
+  extends Phase
+  override rep(): {
+                    #'name: "fault",
+                    #'forfiet: forfiet_index,
+                    #'reason: reason
+                  }
+  fun unrep({ #'forfiet: forfiet_index,
+              #'reason: reason }, _): Fault(forfiet_index, reason)
   export unrep
 
 class State(day :: Int.in(1, 3 ~inclusive),
@@ -132,7 +144,8 @@ fun map_to_state(m :: Map) :~ State:
             | { #'name: "investing" }: Investing.unrep(phase, players)
             | { #'name: "attacking" }: Attacking.unrep(phase, players)
             | { #'name: "buy" }: Buy.unrep(phase, players)
-            | { #'name: "end" }: End.unrep(phase, players),
+            | { #'name: "end" }: End.unrep(phase, players)
+            | { #'name: "fault" }: Fault.unrep(phase, players),
             { lookup_card(to_string(card_name_sym)): card_n , ... },
             players,
             #false)

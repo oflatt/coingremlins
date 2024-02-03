@@ -1,0 +1,115 @@
+#lang zuo
+
+(define (targets-at at-dir vars)
+  (define dist-use-version "8.12")
+
+  (define target-machines
+    '("x86_64-linux"
+      "aarch64-macosx"
+      "x86_64-win32"))
+  (define win-targets
+    '("x86_64-win32"))
+  
+  (define scripts
+    '("game.rhm" "tournament.rhm" "slide.rhm"))
+  (define players
+    '("never" "wrong" "random" "simple" "points" "attack" "decent" "gui"))
+  (define dist-exes
+    '("game" "tournament" "slide" "play_random" "play_decent" "play_gui"))
+
+  (define exes
+    (map (lambda (s) (~a "play_" s))
+         players))
+  (define player_srcs
+    (map (lambda (s) (~a s ".rhm"))
+         exes))
+  
+  (define (raco-cross target . command)
+    (shell/wait "raco cross"
+                (if (null? target)
+                    '()
+                    (list "--target" target))
+                "--version" dist-use-version
+                command))
+
+  (define (cross-install . target)
+    (raco-cross target
+                "pkg install"
+                "--auto" "--skip-installed"
+                "https://github.com/racket/rhombus-prototype.git")
+    ;; just in case...
+    (raco-cross target
+                "setup"))
+
+  (define (setup-name target)
+    (build-path "compiled" (~a target "-" dist-use-version ".setup")))
+  
+  (define (cross-host-prep)
+    (cross-install))
+
+  (define (cross-exe target)
+    (lambda (exe)
+      (define dir (build-path "compiled" target))
+      (mkdir-p dir)
+      (raco-cross target
+                  "make"
+                  (~a exe ".rhm"))
+      (raco-cross target
+                  "exe"
+                  "-o" (build-path dir exe)
+                  (~a exe ".rhm"))))
+
+  (define (cross-dist target)    
+    (define name (~a "economancy-" target))
+    (define win? (member target win-targets))
+    (define name.tgz (~a name (if win? ".zip" ".tgz")))
+    (define dir (build-path "compiled" name))
+    (rm* (build-path "compiled" name.tgz))
+    (rm* dir)
+    (raco-cross target
+                "dist"
+                dir
+                (map (lambda (exe)
+                       (build-path "compiled" target (if win?
+                                                         (~a exe ".exe")
+                                                         exe)))
+                     dist-exes))
+    (cp "dist_README.txt" (build-path dir "README.txt"))
+    (shell/wait (if win?
+                    "zip -r"
+                    "tar zcf")
+                name.tgz name
+                (hash 'dir "compiled")))
+
+  (make-targets
+   `([:target all (,@exes)
+              ,(lambda (token)
+                 (shell/wait "raco make" scripts player_srcs))]
+     ,@(map (lambda (exe src)
+              `[:target ,exe ()
+                        ,(lambda (dest token)
+                           (shell/wait "raco exe --launcher" src))])
+            exes
+            player_srcs)
+
+     ,@(map (lambda (target-machine)
+              (define sym (string->symbol target-machine))
+              `[:target ,sym (,(setup-name target-machine))
+                        ,(lambda (token)
+                           (for-each (cross-exe target-machine) dist-exes)
+                           (cross-dist target-machine))])
+            target-machines)
+
+     ,@(map (lambda (target)
+              `[:target ,(setup-name target) ,(if (equal? target "host")
+                                                  '()
+                                                  (list (setup-name "host")))
+                        ,(lambda (name token)
+                           (if (equal? target "host")
+                               (cross-host-prep)
+                               (cross-install target))
+                           (fd-close (fd-open-output name)))])
+            (cons "host"
+                  target-machines)))))
+
+(build/command-line* targets-at at-source)

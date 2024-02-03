@@ -1,16 +1,26 @@
 Install Rhombus as
 
- raco pkg install "https://github.com/mflatt/rhombus-prototype.git#anipict3"
+ raco pkg install rhombus
 
-to get the "anipict3" branch.
+Install `zuo`, maybe from source using
 
-Then, use `make` to create or compile
+  https://github.com/racket/zuo
 
- play_random  # a player
- play_greedy  # a player
- play_gui     # a player where you provide moves through a GUI
- game.rhm     # the game driver
- slide.rhtm   # a game visualizer
+Then, use `zuo` to create or compile players (listed roughly from
+worst to best):
+
+ play_never
+ play_wrong
+ play_random
+ play_simple
+ play_points
+ play_attack
+ play_decent
+ play_gui     # you provide moves through a GUI
+ 
+ game.rhm         # the game driver
+ slide.rhtm       # a game visualizer
+ tournament.rhtm  # a tournament runner
 
 The "game.rhm" program takes player executables as arguments. For
 example,

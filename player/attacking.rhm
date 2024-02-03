@@ -43,7 +43,8 @@ fun end_attacking(s :: State) :~ State:
                                     p with (cards = [BoughtCard(bc.card, 0), ...])))
 
 fun select_attacker_card(s :: State,
-                         card_index :: Int) :~ State:
+                         card_index :: Int,
+                         ~player_error: player_error = player_error) :~ State:
   match s.phase
   | Attacking(attacker_index, attacker_card_index, _) && phase:
       when attacker_card_index
@@ -51,27 +52,27 @@ fun select_attacker_card(s :: State,
         
       let p = s.players[attacker_index]
       
-      when card_index >= p.cards.length()
-      | player_error("attacker card index is too large")
+      if card_index >= p.cards.length()
+      | player_error(s, "attacker card index is too large")
+      | let bc = p.cards[card_index]
 
-      let bc = p.cards[card_index]
+        if bc.uses >= bc.card.num_attacks
+        | player_error(s,
+                       if bc.card.num_attacks == 0
+                       | "card cannot attack"
+                       | "card for attack is already used to its maximum")
+        | let new_player:
+            p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
+          let new_phase:
+            phase with (attacker_card_index = card_index)
 
-      when bc.uses >= bc.card.num_attacks
-      | player_error(if bc.card.num_attacks == 0
-                     | "card cannot attack"
-                     | "card for attack is already used to its maximum")
-
-      let new_player:
-        p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
-      let new_phase:
-        phase with (attacker_card_index = card_index)
-
-      s with (phase = new_phase,
-              players = s.players.set(attacker_index, new_player))
+          s with (phase = new_phase,
+                  players = s.players.set(attacker_index, new_player))
 
 fun select_defender_card(s :: State,
                          player_index :: Int,
-                         card_index :: Int) :~ State:
+                         card_index :: Int,
+                         ~player_error: player_error = player_error) :~ State:
   match s.phase
   | Attacking(attacker_index, _, defender_card_indexes) && phase:
       when player_index == attacker_index
@@ -81,23 +82,22 @@ fun select_defender_card(s :: State,
 
       let p = s.players[player_index]
       
-      when card_index >= p.cards.length()
-      | player_error("defender card index is too large")
+      if card_index >= p.cards.length()
+      | player_error(s, "defender card index is too large")
+      | let bc = p.cards[card_index]
 
-      let bc = p.cards[card_index]
+        if bc.uses >= bc.card.num_defends
+        | player_error(s,
+                       if bc.card.num_defends == 0
+                       | "card cannot defend"
+                       | "card for defend is already used to its maximum")
+        | let new_player:
+            p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
+          let new_phase:
+            phase with (defender_card_indexes = defender_card_indexes.set(player_index, card_index))
 
-      when bc.uses >= bc.card.num_defends
-      | player_error(if bc.card.num_defends == 0
-                     | "card cannot defend"
-                     | "card for defend is already used to its maximum")
-
-      let new_player:
-        p with (cards = p.cards.set(card_index, BoughtCard(bc.card, bc.uses+1)))
-      let new_phase:
-        phase with (defender_card_indexes = defender_card_indexes.set(player_index, card_index))
-
-      s with (phase = new_phase,
-              players = s.players.set(player_index, new_player))
+          s with (phase = new_phase,
+                  players = s.players.set(player_index, new_player))
 
 fun advance_attacker(s :: State) :~ State:
   match s.phase

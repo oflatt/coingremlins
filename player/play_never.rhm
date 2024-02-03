@@ -1,0 +1,7 @@
+#lang rhombus/static
+import:
+  "json.rhm"
+ 
+recur loop():
+  json.read()
+  loop()

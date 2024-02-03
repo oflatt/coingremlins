@@ -6,7 +6,7 @@ import:
       Pict
       overlay
       beside
-      above
+      stack
       rectangle
       circle
       text
@@ -35,7 +35,8 @@ export:
 defn.macro 'pict_table $id':
   let [[sym, str], ...] = card_meta_list
   let [path_name, ...] = [Syntax.make_temp_id(sym), ...]
-  fun fixup(name): "../docs/base-game/" ++ rkt.#{regexp-replace}(#{#rx"'"}, name, "_") ++ ".png"
+  fun alt(name): if name != "Pass" | name | "Sorcerer's Stipend" // no "Pass" card, so redirect
+  fun fixup(name): "../docs/base-game/" ++ rkt.#{regexp-replace}(#{#rx"'"}, alt(name), "_") ++ ".png"
   let [str, ...] = [fixup(str), ...]
   'runtime_path.def $path_name: $str
    ...
@@ -49,6 +50,7 @@ class.together:
   // game stat plus GUI state
   class ViewState(s :: State,
                   player_index :: maybe(Int),
+                  ~player_names: player_names :: List.of(String) = [],
                   ~selected_shop_card: selected_shop_card :: maybe(Card) = #false,
                   ~players: players :: List.of(PlayerViewState) = State.players(s).map(fun (p): PlayerViewState()),
                   ~waiting: waiting = #false)
@@ -80,10 +82,10 @@ fun shop_pict(vs :: ViewState) :~ Pict:
         cond
         | vs.s.shop[c] == 0:
             // would write cp.fade(0.3), but work around a Cairo bug in PDF generation
-            overlay(cp, rectangle(cp, cp, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
+            overlay(cp, rectangle(~width: cp, ~height: cp, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
         | ~else: cp
       let p:
-        above(cp,
+        stack(cp,
               text(to_string(vs.s.shop[c]))).refocus(cp)
       cond
       | vs.selected_shop_card == c: highlight_card_pict(p)
@@ -96,12 +98,12 @@ fun shop_pict(vs :: ViewState) :~ Pict:
         ~hsep: 10)
 
 fun player_buttons(vs :: ViewState, player_index, mode):
-  let (button_label, action, pass_label, pass_action, halign):
+  let (button_label, action, pass_label, pass_action, horiz):
     match !vs.waiting && mode
     | #'investing:
         let amt = vs.players[vs.player_index].selected_coins || 0        
         values("Invest " +& (vs.players[vs.player_index].selected_coins || 0) +& " Coins",
-               possible_investing_moves(vs.s, vs.s.players[player_index]).has_element(amt)
+               is_possible_investing_move(vs.s, vs.s.players[player_index], amt)
                  && fun (): amt,
                #false,
                #false,
@@ -111,7 +113,9 @@ fun player_buttons(vs :: ViewState, player_index, mode):
         values((if mode == #'attacking | "Attack" | "Defend")
                  +& " with "
                  +& (if card_index
-                     | vs.s.players[vs.player_index].cards[card_index].card.name
+                     | if card_index >= 0 && card_index < vs.s.players[vs.player_index].cards.length()
+                       | vs.s.players[vs.player_index].cards[card_index].card.name
+                       | "index " +& card_index
                      | ""),
                card_index
                  && (if mode == #'attacking
@@ -135,7 +139,7 @@ fun player_buttons(vs :: ViewState, player_index, mode):
         values("Waiting", #false, #false, #false, #'center)
   fun button_pict(label, action, clicking):
     let is_clicking = vs.players[player_index].clicking == clicking
-    rectangle(~around: text(label).fade(if action | 1 | 0.5).inset(10, 5)
+    rectangle(~around: text(label).alpha(if action | 1 | 0.5).pad(~horiz: 10, ~vert: 5)
                          .colorize(if is_clicking | "white" | "black"),
               ~line: if action | "blue" | "gray",
               ~fill: if action
@@ -145,7 +149,7 @@ fun player_buttons(vs :: ViewState, player_index, mode):
                      | "white")
   let button = button_pict(button_label, action, #'go)
   let pass = pass_action && button_pict(pass_label, !action && pass_action, #'pass)
-  values (button, action, pass, pass_action, halign)
+  values (button, action, pass, pass_action, horiz)
 
 fun player_view(vs :: ViewState, player_index) :~ PlayerView:
   let p = vs.s.players[player_index]
@@ -181,32 +185,42 @@ fun player_view(vs :: ViewState, player_index) :~ PlayerView:
   let hand:
     beside(~sep:10, & cards)
   let coins:
-    above(~sep: 10,
+    stack(~sep: 10,
           block:
-            let c = circle(30, ~fill: "gold", ~line: "gray")
+            let c = circle(~size: 30, ~fill: "gold", ~line: "gray")
             let n = player_vs.selected_coins || (mode == #'investing && 0)
             if n
             | overlay(c, text(to_string(n)))
             | c,
           text(to_string(p.coins)))
   let p = beside(~sep: 20, coins, hand)
-  let p = overlay(~halign: #'left, p, pict.blank(card_picts[stipend].width * 4, 0))
+  let p = overlay(~horiz: #'left, p, pict.blank(~width: card_picts[stipend].width * 4))
 
-  let (button :~ Pict, action, pass, pass_action, halign) = player_buttons(vs, player_index, mode)
+  let (button :~ Pict, action, pass, pass_action, horiz) = player_buttons(vs, player_index, mode)
   let p :~ Pict:
     let sep = 20
     cond
     | !pass:
-        above(~sep: sep, ~halign: halign, p, button)
-    | halign != #'center || button.width/2 + Pict.width(pass) + sep < p.width/2:
-        let p: above(~sep: sep, ~halign: halign, p, button)
-        overlay(~valign: #'bottom, ~halign: #'right, p, pass)
+        stack(~sep: sep, ~horiz: horiz, p, button)
+    | horiz != #'center || button.width/2 + Pict.width(pass) + sep < p.width/2:
+        let p: stack(~sep: sep, ~horiz: horiz, p, button)
+        overlay(~vert: #'bottom, ~horiz: #'right, p, pass)
     | ~else:
-        above(~sep: sep, ~halign: #'right, p,
+        stack(~sep: sep, ~horiz: #'right, p,
               beside(~sep: sep, button, pass))
+  let p :~ Pict:
+    if vs.player_names.length() > player_index
+    | stack(~sep: 12, ~horiz: #'left, pict.text(vs.player_names[player_index]), p)
+    | p
   PlayerView(
-    ~pict: rectangle(~around: p.inset(20),
-                     ~fill: if player_index == winner_index(vs.s) | "yellow" | #false,
+    ~pict: rectangle(~around: p.pad(20),
+                     ~fill: cond
+                            | player_index == winner_index(vs.s):
+                                "yellow"
+                            | player_index == forfiet_index(vs.s):
+                                "red"
+                            | ~else:
+                                #false,
                      ~line_width: if player_index == vs.player_index | 3 | 1,
                      ~line: if player_index == vs.player_index | "green" | "black"),
     ~cards: cards,
@@ -239,11 +253,11 @@ fun game_view(vs :: ViewState) :~ View:
   let day_pict:
     text("Day " +& vs.s.day).colorize("firebrick").scale(2)
   let p = beside(~sep: 50,
-                 above(day_pict.ghost(),
+                 stack(day_pict.ghost(),
                        shop_pict(vs)),
-                 above(~sep: 20, player.pict, ...))
-  let p = overlay(~valign: #'top,
-                  ~halign: #'left,
+                 stack(~sep: 20, player.pict, ...))
+  let p = overlay(~vert: #'top,
+                  ~horiz: #'left,
                   p,
                   day_pict)
   View(

@@ -1,0 +1,74 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "phase.rhm" open
+  "card.rhm" open
+  "play_points.rhm".points_candidate_moves
+  "play_attack.rhm".attack_candidate_moves
+
+// As the imports suggest, this is a hybrid of `play_points`
+// and `play_attack`, and it also adds investment to defend
+// against attacks
+
+fun best_candidate_moves(s :: State, me :: Player, me_index :: Int) :~ List:
+  match s.phase
+  | phase :: Investing:
+      let defensive_invest:
+        math.min(me.coins, defense_max_cost(s, me, me_index))
+      let [offensive_invest]:
+        attack_candidate_moves(s, me, me_index)
+      [math.max(defensive_invest, offensive_invest)]
+  | phase :: Attacking:
+      let candidates = attack_candidate_moves(s, me, me_index)
+      if (phase.attacker_index == me_index)
+      | let candidates = filter_attack_candidates(s, me, me_index, candidates)
+        if candidates == []
+        | [0]
+        | candidates
+      | candidates
+  | phase :: Buy:
+      // go with "points" mode if it suggests only one possibility
+      let candidates = points_candidate_moves(s, me, me_index)
+      if candidates.length() == 1
+      | candidates
+      | attack_candidate_moves(s, me, me_index)
+  | ~else:
+      points_candidate_moves(s, me, me_index)
+
+fun defense_max_cost(s :: State, me :: Player, me_index :: Int):
+  math.max(
+    & for List (p: s.players,
+                i: 0..):
+      skip_when i == me_index
+      if (for any (a_bc: p.cards):
+            skip_when !a_bc.card.attack_level                            
+            skip_when a_bc.card.num_attacks < 1                            
+            for all (d_bc: me.cards):
+              skip_when !d_bc.card.defense_level                            
+              skip_when d_bc.card.num_defends < 1                            
+              a_bc.card.attack_level > d_bc.card.defense_level
+                && a_bc.card.defense_level >= d_bc.card.attack_level)
+      | p.coins
+      | 0
+  )
+
+// don't attack with points, unless we can afford to lose them
+fun filter_attack_candidates(s :: State, me :: Player, me_index :: Int,
+                             candidates :~ List) :~ List:
+  fun points(p :: Player):
+    for values(sum = 0) (bc: p.cards):
+      sum + bc.card.points
+  let max_opponent_points:
+    math.max(& for List (p: s.players,
+                         i: 0..):
+               skip_when i == me_index
+               points(p))
+  let points = points(me)
+  for List (candidate: candidates):
+    let c_points = me.cards[candidate].card.points
+    skip_when: c_points > 0 && points - c_points < max_opponent_points
+    candidate
+
+module main:
+  import: "play.rhm".play
+  play(best_candidate_moves)

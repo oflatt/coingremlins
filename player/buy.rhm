@@ -20,32 +20,31 @@ fun start_buy(s :: State) :~ State:
 
 fun add_buy(s :: State,
             player_index :: Int,
-            card_name :: String) :~ State:
+            card_name :: String,
+            ~player_error: player_error = player_error) :~ State:
   let c:
     for any (c: all_cards):
       (c.name == card_name) && c
-  unless c
-  | player_error("unrecognized card name")
-  let c :~ Card = c
-  unless c == pass || c.cost
-  | player_error("card cannot be bought")
-  
-  let p = s.players[player_index]
-  when c != pass && c.cost > p.coins
-  | player_error("player does not have enough coins to buy card")
-  
-  match s.phase
-  | Buy(buy_cards) && buy:
-      when buy_cards[player_index]
-      | game_error("player already used this buy")
+  if !c || (c != pass && !s.shop.has_key(c))
+  | player_error(s, "unrecognized card name")
+  | let c :~ Card = c
+    if !(c == pass || c.cost)
+    | player_error(s, "card cannot be bought")
+    | let p = s.players[player_index]
+      if c != pass && c.cost > p.coins
+      | player_error(s, "player does not have enough coins to buy card")
+      | match s.phase
+        | Buy(buy_cards) && buy:
+            when buy_cards[player_index]
+            | game_error("player already used this buy")
 
-      when p.buys == 0
-      | game_error("player does not have buys")
+            when p.buys == 0
+            | game_error("player does not have buys")
 
-      let new_buy:
-        buy with (buy_cards = buy_cards.set(player_index, c))
+            let new_buy:
+              buy with (buy_cards = buy_cards.set(player_index, c))
 
-      s with (phase = new_buy)
+            s with (phase = new_buy)
 
 fun end_buy(s :: State) :~ State:
   match s.phase

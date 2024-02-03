@@ -1,0 +1,20 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "json.rhm"
+ 
+export:
+  play
+
+fun play(candidate_moves :: Function):
+  recur loop():
+    let s_json :~ Map = json.read()
+    let s = map_to_state(s_json)
+    let me_index = s_json[#'player]
+    let me = s.players[me_index]
+    let candidate_moves :~ List = candidate_moves(s, me, me_index)
+    let n = candidate_moves.length()
+    unless n == 0
+    | let move = candidate_moves[math.random(n)]
+      json.write([move])
+      loop()
