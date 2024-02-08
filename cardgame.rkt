@@ -115,7 +115,7 @@
 (dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "" "Has +1 to hp and attack for each coin the owner has." (list booster1-tag))
 (dcard gold-mine   #f   "Gold mine"    3  2  2 1 "" "Day 2: +1 coin for each card to the right of this card." (list booster1-tag))
 (dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins\nEvery day: -2 coin after the buy phase." "" (list booster1-tag))
-(dcard moppet    #f   "Moppet"        4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
+(dcard moppet    #f   "BuffFarmer2"    4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
 (dcard spirit   #f   "Spirit"        2  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
 
 
