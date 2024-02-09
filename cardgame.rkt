@@ -111,7 +111,7 @@
 
 ;; ################  BOOSTER 1 ##################################
 (dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" "" (list booster1-tag))
-(dcard lizard    "lizard.png"   "Aggresive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when attacking other players." (list booster1-tag))
+(dcard lizard    "lizard.png"   "Aggressive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when attacking other players." (list booster1-tag))
 (dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "" "Has +1 to hp and attack for each coin the owner has." (list booster1-tag))
 (dcard gold-mine   #f   "Gold mine"    3  2  2 1 "" "Day 2: +1 coin for each card to the right of this card." (list booster1-tag))
 (dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins\nEvery day: -2 coin after the buy phase." "" (list booster1-tag))
