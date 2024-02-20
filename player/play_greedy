@@ -1,8 +1,0 @@
-#!/bin/sh
-# This script was created by make-mzscheme-launcher
-
-# {{{ bindir
-bindir="/Users/mflatt/plt/racket/bin"
-# }}} bindir
-
-exec "${bindir}/racket" -N "$0" '-t' '/Users/mflatt/repo/oflatt/economancy/player/play_greedy.rhm' '-U' '--'  ${1+"$@"}

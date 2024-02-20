@@ -10,6 +10,7 @@ export:
   apply_investments
   winning_investment
   possible_investing_moves
+  is_possible_investing_move
 
 fun start_investing(s :: State) :~ State:
   unless s.phase is_a Income
@@ -21,10 +22,11 @@ fun start_investing(s :: State) :~ State:
 
 fun add_investment(s :: State,
                    player_index :: Int,
-                   coins :: Int) :~ State:
+                   coins :: Int,
+                   ~player_error: player_error = player_error) :~ State:
   let p = s.players[player_index]
   if coins > p.coins
-  | player_error("player attempted to invest more coins than they have")
+  | player_error(s, "player attempted to invest more coins than they have")
   | match s.phase
     | Investing(investments):
         when investments[player_index] | game_error("player already has an investment")
@@ -52,5 +54,9 @@ fun winning_investment(s :: State) :: maybe(Int):
       | winner
   winner != #'none && winner
 
+// This can be a bad idea, because a player can accumulate a lot of coins!
 fun possible_investing_moves(s :: State, p :: Player) :~ List.of(NonnegInt):
   for List (i: 0..p.coins+1): i
+
+fun is_possible_investing_move(s :: State, p :: Player, amt):
+  amt is_a NonnegInt && amt <= p.coins

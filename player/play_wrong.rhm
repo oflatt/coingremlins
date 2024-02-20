@@ -1,0 +1,30 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "phase.rhm" open
+  "play.rhm" open
+  "card.rhm" open
+
+fun add_wrong(candidates :~ List):
+  if candidates == []
+  | []
+  | candidates.add(if candidates[0] is_a Int
+                   | math.random(math.max(& candidates) + 10) - 5
+                   | if (math.random(10) == 0)
+                     | "Nonesuch"
+                     | all_cards[math.random(all_cards.length())].name)
+
+play(fun (s :: State, me :: Player, me_index :: Int):
+       add_wrong(
+         match s.phase
+         | phase :: Investing:
+             possible_investing_moves(s, me)
+         | phase :: Attacking:
+             if (phase.attacker_index == me_index)
+             | possible_attacking_moves(s, me)
+             | possible_defending_moves(s, me)
+         | phase :: Buy:
+             possible_buy_moves(s, me)
+         | ~else:
+             []
+       ))

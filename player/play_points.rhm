@@ -1,0 +1,39 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "phase.rhm" open
+  "card.rhm" open
+  "play_simple.rhm".simple_candidate_moves
+
+export:
+  points_candidate_moves
+
+fun points_candidate_moves(s :: State, me :: Player, me_index :: Int) :~ List:
+  match s.phase
+  | phase :: Investing:
+      [0]
+  | phase :: Attacking:
+      simple_candidate_moves(s, me, me_index)
+  | phase :: Buy:
+      // aim for a particular buy sequence to win by points
+      let candidates = simple_candidate_moves(s, me, me_index)
+      fun can_buy(target_card):
+        candidates.has_element(target_card)
+      let target_card:
+        match me.cards.length()
+        | 1: "Worker"
+        | 2: "Gold Fish"
+        | 5: "Board of Monopoly"
+        | ~else:
+            if can_buy("Incantation")
+            | "Incantation"
+            | "Board of Monopoly"
+      if can_buy(target_card)
+      | [target_card]
+      | candidates
+  | ~else:
+      []
+
+module main:
+  import: "play.rhm".play
+  play(points_candidate_moves)

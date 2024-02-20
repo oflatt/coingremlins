@@ -11,97 +11,139 @@ import:
 
 export:
   drive_game
+  drive_stdio_game
 
 fun drive_game(number_of_players :: Int,
                move :: Function, // (State, player_index, data) -> (move, data)
                ~data = #false,
-               ~simple: simple :: Boolean = #true):
-  fun get_move(s :~ State, i, pred):
+               ~simple: simple :: Boolean = #true,
+               ~max_days: max_days :: Int = 100):
+  fun get_move(s :~ State, i, pred) :: (State, Any):
     let (v, data) = move(s, i, s.data)
-    if pred(v)
+    if pred(v):
     | values(s with (data = data), v)
-    | player_error("bad move: " +& to_string(v, ~mode: #'expr))
+    | let msg:
+        match v
+        | exn :: Exn:
+            Exn.message(exn)
+        | ~else:
+            "bad move: " +& to_string(v, ~mode: #'expr)
+      values(s with (phase = Fault(i, msg), data = data), #'fault)
   fun is_NonnegInt(v): v is_a NonnegInt
   fun is_String(v): v is_a String
 
-  fun income_phase(s):
-    let s = income(s)
-    investing_phase(s)
+  fun error_as_fault(i):
+    fun (s :: State, msg):
+      s with (phase = Fault(i, msg))
 
-  fun investing_phase(s):
+  fun income_phase(s, num_days):
+    if num_days == max_days
+    | game_over(s)
+    | let s = income(s)
+      investing_phase(s, num_days)
+
+  fun investing_phase(s, num_days):
     let s = start_investing(s)
-    let s:
-      for values(s = s) (p: s.players,
-                         i: 0..):
-        if p.cards == []
+    let s :~ State:
+      for values(s :~ State = s) (p: s.players,
+                                  i: 0..):
+        if p.cards == [] || (s.phase is_a Fault)
         | s
         | let (s, investment) = get_move(s, i, is_NonnegInt)
-          add_investment(s, i, investment)
-    attacking_phase(apply_investments(s))
+          if s.phase is_a Fault
+          | s
+          | add_investment(s, i, investment,
+                           ~player_error: error_as_fault(i))
+    if s.phase is_a Fault
+    | game_forfieted(s)
+    | attacking_phase(apply_investments(s), num_days)
 
-  fun attacking_phase(s):
+  fun attacking_phase(s, num_days):
     let attacker_index = winning_investment(s)
     if !attacker_index
-    | buy_phase(s)
+    | buy_phase(s, num_days)
     | let s = start_attacking(s, attacker_index)
       recur attacking_loop(s :~ State = s):
         if !player_can_attack(s.players[attacker_index])
         | let s = end_attacking(s)
-          buy_phase(s)
+          buy_phase(s, num_days)
         | let (s, card_index) = get_move(s, attacker_index, is_NonnegInt)
-          if card_index == 0 // => chose not to attack
-          | let s = end_attacking(s)
-            buy_phase(s)
-          | let s = select_attacker_card(s, card_index)
-            let s:
-             for values(s :~ State = s) (p: s.players,
-                                         i: 0..):
-               cond
-               | i == attacker_index: s
-               | Attacking.defender_card_indexes(s.phase)[i] == 0: s
-               | ~else:
-                   let (s, card_index) = get_move(s, i, is_NonnegInt)
-                   select_defender_card(s, i, card_index)
-            let s = advance_attacker(s)
-            if winner_index(s)
-            | game_over(s)
-            | attacking_loop(s)
+          cond
+          | s.phase is_a Fault:
+              game_forfieted(s)
+          | card_index == 0: // => chose not to attack
+              let s = end_attacking(s)
+              buy_phase(s, num_days)
+          | ~else:
+              let s = select_attacker_card(s, card_index,
+                                           ~player_error: error_as_fault(attacker_index))
+              let s:
+               for values(s :~ State = s) (p: s.players,
+                                           i: 0..):
+                 cond
+                 | s.phase is_a Fault: s
+                 | i == attacker_index: s
+                 | Attacking.defender_card_indexes(s.phase)[i] == 0: s
+                 | ~else:
+                     let (s, card_index) = get_move(s, i, is_NonnegInt)
+                     if s.phase is_a Fault
+                     | s
+                     | select_defender_card(s, i, card_index,
+                                            ~player_error: error_as_fault(i))
+              if s.phase is_a Fault
+              | game_forfieted(s)
+              | let s = advance_attacker(s)
+                if winner_index(s)
+                | game_over(s)
+                | attacking_loop(s)
 
-  fun buy_phase(s):
+  fun buy_phase(s, num_days):
     let s = start_buy(s)
     let s :~ State:
       recur buy_loop(s :~ State = s):
         if (for all (p: s.players):
               p.buys == 0)
         | s
-        | let s:
-            for values(s = s) (p: s.players,
-                               i: 0..):
+        | let s :~ State:
+            for values(s :~ State = s) (p: s.players,
+                                        i: 0..):
               cond
+              | s.phase is_a Fault: s
               | p.buys > 0:
                   let (s, card_name) = get_move(s, i, is_String)
-                  add_buy(s, i, card_name)
+                  if s.phase is_a Fault
+                  | s
+                  | add_buy(s, i, card_name,
+                            ~player_error: error_as_fault(i))
               | ~else:
                   s
-          let s = end_buy(s)
-          if winner_index(s)
-          | game_over(s)
-          | buy_loop(s)
-    if winner_index(s)
-    | game_over(s)
-    | income_phase(new_day(s))    
+          if s.phase is_a Fault
+          | s
+          | let s = end_buy(s)
+            if winner_index(s)
+            | s
+            | buy_loop(s)
+    cond
+    | s.phase is_a Fault: game_forfieted(s)
+    | winner_index(s): game_over(s)
+    | ~else: income_phase(new_day(s), num_days+1)
 
   fun game_over(s :~ State):
     values(s with (phase = End(winner_index(s))),
            s.data)
+  fun game_forfieted(s :~ State):
+    values(s, s.data)
         
   let s = make_game(number_of_players,
                     ~simple: simple,
                     ~data: data)
-  income_phase(s)
+  income_phase(s, 0)
 
 fun drive_stdio_game(player_exes :: List.of(Path),
-                     ~simple: simple :: Boolean = #true):
+                     ~simple: simple :: Boolean = #true,
+                     ~max_days: max_days :: Int = 100,
+                     ~timeout: timeout :: Real = 10.0,
+                     ~k: k :: Function = Function.pass):
   import:
     lib("racket/base.rkt") as rkt
     lib("racket/port.rkt") as rkt_port
@@ -109,38 +151,74 @@ fun drive_stdio_game(player_exes :: List.of(Path),
   let procs :~ List.of(Process):
     for List (exe: player_exes):
       let (handle, out, in, err) = rkt.subprocess(#false, #false, #false, exe)
-      rkt.thread(fun (): rkt_port.#{copy-port}(err, Port.Output.current_error()))
+      rkt.thread(fun ():
+                   rkt_port.#{copy-port}(err, Port.Output.current_error())
+                   rkt.#{close-input-port}(err))
       Process(handle, in, out)
 
-  let (final_s :~ State, _):
+  let (final_s :~ State, _):    
     drive_game(procs.length(),
+               ~simple: simple,
+               ~max_days: max_days,
                fun (s :: State, player_index, data):
-                 let s_map = state_to_map(s) ++ { #'player: player_index }
-                 json.write(s_map)
-                 json.write(s_map, procs[player_index].in)
-                 let move = json.read(procs[player_index].out)
-                 json.write(move)
-                 match move
-                 | [move]:
-                    values(move, data)
-                 | ~else:
-                    player_error("move is not in an array: " +& to_string(move, ~mode: #'expr)),
-               ~simple: simple)
+                 try:
+                   let s_map = state_to_map(s) ++ { #'player: player_index }
+                   json.write(s_map)
+                   json.write(s_map, procs[player_index].in)
+                   let ch = rkt.#{make-channel}()
+                   rkt.thread(fun ():
+                                rkt.#{channel-put}(ch, json.read(procs[player_index].out)))
+                   let move = rkt.#{sync/timeout}(timeout, ch) || "timeout"
+                   json.write(move)
+                   match move
+                   | [move]:
+                      values(move, data)
+                   | ~else:
+                      player_error(s, "move is not in an array: " +& to_string(move, ~mode: #'expr))
+                   ~catch exn :: Exn.Fail:
+                     values(exn, data))
 
   let final_map = state_to_map(final_s)
   json.write(final_map)
   for (player_index: 0 .. procs.length()):
-    json.write(final_map ++ { #'player: player_index }, procs[player_index].in)
-  
+    try:
+      json.write(final_map ++ { #'player: player_index }, procs[player_index].in)
+      ~catch exn :: Exn.Fail: #void
+    rkt.#{close-output-port}(procs[player_index].in)
+    rkt.#{close-input-port}(procs[player_index].out)
+
+  k(final_s)
+
 module main:
   import:
     lib("racket/base.rkt") as rkt
-  match rkt.#{current-command-line-arguments}()
-  | Array(): #void
-  | Array("--base", exe, ...):
-      drive_stdio_game([Path(exe), ...], ~simple: #false)
-  | Array(exe, ...):
-      drive_stdio_game([Path(exe), ...])
+  recur loop (args = rkt.#{current-command-line-arguments}(),
+              ~simple: simple = #true,
+              ~max_days: max_days = 100,
+              ~timeout: timeout = 10.0):
+    match args
+    | Array("--help", exe, ...):
+        println("Provide player executable paths as arguments")
+        println("Flags:")
+        println("  --base: play with all base-game cards")
+        println("  --max_days <n>: max days until a draw is declared")
+        println("  --timeout <n>: max seconds allowed for a player")        
+    | Array("--base", exe, ...):
+        loop(Array(exe, ...), ~simple: #false)
+    | Array("--max_days", n, exe, ...):
+        loop(Array(exe, ...), ~max_days: String.to_int(n))
+    | Array("--timeout", n, exe, ...):
+        loop(Array(exe, ...), ~timeout: String.to_number(n))
+    | Array((s :: String) when s.length() > 0 && s[0] == "-"[0], _, ...):
+        error("bad flag: " ++ to_string(s, ~mode: #'expr))
+    | Array(exe, ...):
+        let len = [exe, ...].length()
+        unless len >= 2 && len <= 4
+        | error("given " +& len +& " players, need 2 to 4")
+        drive_stdio_game([Path(exe), ...],
+                         ~simple: simple,
+                         ~max_days: max_days,
+                         ~timeout: timeout)
 
 module test:
   drive_game(

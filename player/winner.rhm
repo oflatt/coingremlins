@@ -7,6 +7,7 @@ import:
 export:
   player_points
   winner_index
+  forfiet_index
 
 fun player_points(p :: Player) :: Int:
   for values(points = 0) (bc: p.cards):
@@ -37,3 +38,8 @@ fun winner_index(s :: State) :: maybe(Int || matching(#'no_one)):
           | ~else:
               values(winner, win_points)
       winner != #'none && win_points >= 7 && winner
+
+fun forfiet_index(s :: State) :: maybe(Int):
+  match s.phase
+  | Fault(index, _): index
+  | ~else: #false

@@ -1,0 +1,47 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "phase.rhm" open
+  "card.rhm" open
+  lib("racket/base.rkt").random
+
+export:
+  simple_candidate_moves
+
+module main:
+  import: "play.rhm".play
+  play(simple_candidate_moves)
+
+fun simple_candidate_moves(s :: State, me :: Player, me_index :: Int) :~ List:
+  match s.phase
+  | phase :: Investing:
+      // invest randomly, 50% probability of non-0
+      let candiates = possible_investing_moves(s, me)
+      if candiates.length() > 0 && random(1) == 0
+      | candiates.remove(0)
+      | [0]
+  | phase :: Attacking:
+      // pick strongest available card to attack or defend
+      let (candidates :~ List, get_level):            
+        if (phase.attacker_index == me_index)
+        | values(possible_attacking_moves(s, me).remove(0),
+                 fun (card :~ Card): card.attack_level)
+        | values(possible_defending_moves(s, me),
+                 fun (card :~ Card): card.defense_level)
+      let best_level = math.max(& for List (i: candidates): get_level(me.cards[i].card))
+      for List (i: candidates):
+        skip_when get_level(me.cards[i].card) < best_level
+        i
+  | phase :: Buy:
+      // buy randomly, but always buy if possible
+      let candidates = possible_buy_moves(s, me)
+      let candidates:
+        for List (card_name: candidates):
+          skip_when card_name == "Pass"
+          skip_when s.shop[lookup_card(card_name)] == 0
+          card_name
+      if candidates.length() == 0
+      | ["Pass"]
+      | candidates
+  | ~else:
+      []

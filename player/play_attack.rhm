@@ -1,0 +1,86 @@
+#lang rhombus/static
+import:
+  "state.rhm" open
+  "phase.rhm" open
+  "card.rhm" open
+  "play_simple.rhm".simple_candidate_moves
+
+export:
+  attack_candidate_moves
+
+fun attack_candidate_moves(s :: State, me :: Player, me_index :: Int) :~ List:
+  match s.phase
+  | phase :: Investing:
+      let candidates = filter_attack_candidates(s, me, me_index, [& 0..me.cards.length()])
+      if candidates.length() > 0
+      | // it's probably not worth using all our coins to take out one card,
+        // but maybe we can expect to take out multiple cards, or maybe
+        // it won't cost all ours coins
+        let cost = math.min(me.coins,
+                            math.max(& for List (p: s.players,
+                                                 i: 0..):
+                                       skip_when i == me_index
+                                       p.coins+1))
+        // checking `candidates.length() > 1` is an approximation to being
+        // able to take multiple cards by attacking
+        if (cost < me.coins - 1) || candidates.length() > 1
+        | [cost]
+        | [0]
+      | [0]
+  | phase :: Attacking:
+      let candidates = simple_candidate_moves(s, me, me_index)
+      if (phase.attacker_index == me_index)
+      | let candidates = filter_attack_candidates(s, me, me_index, candidates)
+        if candidates == []
+        | [0]
+        | candidates
+      | candidates
+  | phase :: Buy:
+      // aim for a particular buy sequence to win by points
+      let candidates = simple_candidate_moves(s, me, me_index)
+      fun can_buy(card_name):
+        candidates.has_element(card_name)
+      cond
+      | ghost_count(me) < 2 && can_buy("Ghost"):
+          ["Ghost"]
+      | can_buy("Senior Worker"):
+          ["Senior Worker"]
+      | can_buy("Worker"):
+          ["Worker"]
+      | ~else:
+          candidates
+  | ~else:
+      []
+
+fun ghost_count(p :~ Player):
+  for values(sum = 0) (bc: p.cards):
+    if bc.card.name == "Ghost"
+    | sum + 1
+    | sum
+
+// keep only attack candidates that will sometimes win and not feint ever
+fun filter_attack_candidates(s :: State, me :: Player, me_index :: Int,
+                             candidates :~ List) :~ List:
+  for List (candidate: candidates):
+    skip_when candidate == 0
+    let a_bc = me.cards[candidate]
+    skip_when !a_bc.card.attack_level
+    skip_when a_bc.uses >= a_bc.card.num_attacks
+    keep_when (for all (p: s.players,
+                        i: 0..):
+                 skip_when i == me_index
+                 skip_when total_uses(p, Card.num_defends) < total_uses(me, Card.num_attacks)
+                 for all (d_bc: p.cards):
+                   skip_when !d_bc.card.defense_level                            
+                   skip_when d_bc.card.num_defends <= d_bc.uses
+                   a_bc.card.attack_level > d_bc.card.defense_level
+                     && a_bc.card.defense_level >= d_bc.card.attack_level)
+    candidate
+
+fun total_uses(p :~ Player, card_num):
+  for values(sum = 0) (bc: p.cards):
+    sum + card_num(bc.card)
+
+module main:
+  import: "play.rhm".play
+  play(attack_candidate_moves)

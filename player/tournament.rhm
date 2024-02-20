@@ -1,0 +1,86 @@
+#lang rhombus/static
+import:
+  "game.rhm"
+  "state.rhm" open
+  "json.rhm"
+
+fun drive_tournament(player_exes :: List.of(Path),
+                     ~simple: simple :: Boolean = #true,
+                     ~max_days: max_days = 100,
+                     ~timeout: timeout = 10.0,
+                     ~games: games :: Int = 10):
+  fun tournament_round([p_i, ...], accum_record :: Map):
+    json.write({ #'meta: "players", #'names: [to_string(player_exes[p_i]), ...] })
+    let [g_i, ...] = [& 0..[p_i, ...].length()]
+    let (wins, forfiets, draws):
+      for values(wins :~ Map = { g_i: 0, ... },
+                 forfiets :~ Map = { g_i: 0, ... },
+                 draws = 0) (i: 0..games):
+        game.drive_stdio_game(
+          [player_exes[p_i], ...],
+          ~simple: simple,
+          ~max_days: max_days,
+          ~timeout: timeout,
+          ~k: fun (s :: State):
+                match s.phase
+                | End(index):
+                    if !index
+                    | values (wins, forfiets, draws+1)
+                    | values(wins ++ { index: wins[index]+1 },
+                             forfiets,
+                             draws)
+                | Fault(index, msg):
+                    values(wins,
+                           forfiets ++ { index: forfiets[index]+1 },
+                           draws)
+        )
+    json.write({ #'meta: "record",
+                 #'players: [[to_string(player_exes[p_i]), wins[g_i], forfiets[g_i], draws],
+                             ...] })
+    for values(accum_record :: Map = accum_record) (p_i: [p_i, ...],
+                                                    g_i: [g_i, ...]):
+      let [num_wins, num_forfiets, num_draws] = accum_record[p_i]
+      accum_record ++ { p_i: [num_wins + wins[g_i], num_forfiets + forfiets[g_i], num_draws + draws] }
+
+  let n = player_exes.length()
+  let [p_i, ...] = [& 0..n]
+  let accum_record :~ Map:
+    for values(accum_record = { p_i: [0, 0, 0], ... }) (i: 0..n):
+      for values(accum_record = accum_record) (j: 0..n):
+        skip_when i == j
+        tournament_round([i, j], accum_record)
+  json.write({ #'meta: "record",
+               #'players: [[to_string(player_exes[p_i]), & accum_record[p_i]] ,...] })
+  
+module main:
+  import:
+    lib("racket/base.rkt") as rkt
+  recur loop (args = rkt.#{current-command-line-arguments}(),
+              ~simple: simple = #true,
+              ~games: games = 10,
+              ~max_days: max_days = 100,
+              ~timeout: timeout = 10.0):
+    match args
+    | Array("--help", exe, ...):
+        println("Provide player executable paths as arguments")
+        println("Flags:")
+        println("  --games <n>: number of games to play with each pair order")
+        println("  --base: play with all base-game cards")
+        println("  --max_days <n>: max days until a draw is declared")
+        println("  --timeout <n>: max seconds allowed for a player")
+    | Array("--base", exe, ...):
+        loop(Array(exe, ...), ~simple: #false)
+    | Array("--games", n, exe, ...):
+        loop(Array(exe, ...), ~games: String.to_int(n))
+    | Array("--max_days", n, exe, ...):
+        loop(Array(exe, ...), ~max_days: String.to_int(n))
+    | Array("--timeout", n, exe, ...):
+        loop(Array(exe, ...), ~timeout: String.to_number(n))    
+    | Array((s :: String) when s.length() > 0 && s[0] == "-"[0], _, ...):
+        error("bad flag: " ++ to_string(s, ~mode: #'expr))
+    | Array(exe, ...):
+        drive_tournament([Path(exe), ...],
+                         ~simple: simple,
+                         ~games: games,
+                         ~max_days: max_days,
+                         ~timeout: timeout)

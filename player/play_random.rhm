@@ -2,28 +2,17 @@
 import:
   "state.rhm" open
   "phase.rhm" open
-  "json.rhm"
-  lib("racket/base.rkt").random
+  "play.rhm" open
 
-recur loop():
-  let s_json :~ Map = json.read()
-  let s = map_to_state(s_json)
-  let me_index = s_json[#'player]
-  let me = s.players[me_index]
-  let candidate_moves :~ List:
-    match s.phase
-    | phase :: Investing:
-        possible_investing_moves(s, me)
-    | phase :: Attacking:
-        if (phase.attacker_index == me_index)
-        | possible_attacking_moves(s, me)
-        | possible_defending_moves(s, me)
-    | phase :: Buy:
-        possible_buy_moves(s, me)
-    | phase :: End:
-        []
-  let n = candidate_moves.length()
-  unless n == 0
-  | let move = candidate_moves[random(n)]
-    json.write([move])
-    loop()
+play(fun (s :: State, me :: Player, me_index :: Int):
+       match s.phase
+       | phase :: Investing:
+           possible_investing_moves(s, me)
+       | phase :: Attacking:
+           if (phase.attacker_index == me_index)
+           | possible_attacking_moves(s, me)
+           | possible_defending_moves(s, me)
+       | phase :: Buy:
+           possible_buy_moves(s, me)
+       | ~else:
+           [])
