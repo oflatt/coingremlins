@@ -69,6 +69,7 @@ cards card_meta_list:
     Card("Wall of Wealth",
          1, 2,
          1, 2,
+         ~defends: 2,
          ~coins:
            fun (day, money):
              if day == 1
