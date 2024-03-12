@@ -55,15 +55,15 @@ fun defense_max_cost(s :: State, me :: Player, me_index :: Int):
 // don't attack with points, unless we can afford to lose them
 fun filter_attack_candidates(s :: State, me :: Player, me_index :: Int,
                              candidates :~ List) :~ List:
-  fun points(p :: Player):
+  fun get_points(p :: Player):
     for values(sum = 0) (bc: p.cards):
       sum + bc.card.points
   let max_opponent_points:
     math.max(& for List (p: s.players,
                          i: 0..):
                skip_when i == me_index
-               points(p))
-  let points = points(me)
+               get_points(p))
+  let points = get_points(me)
   for List (candidate: candidates):
     let c_points = me.cards[candidate].card.points
     skip_when: c_points > 0 && points - c_points < max_opponent_points
