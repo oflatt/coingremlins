@@ -35,13 +35,6 @@ jobs:
         uses: Bogdanp/setup-racket@v1.9
         with:
           version: "8.10"
-      - name: "Install Zuo"
-        run: |
-          git clone https://github.com/racket/zuo.git
-          cd zuo
-          ./configure
-          make
-          cd ..
       - name: "Install raco cross"
         run: raco pkg install --auto -D raco-cross
       #- name: "Install rhombus"
@@ -62,14 +55,19 @@ jobs:
       - name: "Build Binaries"
         run: |
           cd player
-          pwd
-          ls ..
-          ls ../zuo
+          git clone https://github.com/racket/zuo.git
+          # install zuo in a sub-folder
+          cd zuo
+          ./configure
+          make
+          cd ..
+          # make compiled folder so zuo doesn't complain
           mkdir compiled
-          ../zuo/zuo . x86_64-linux gui
-          ../zuo/zuo . aarch64-macosx gui
-          ../zuo/zuo . x86_64-macosx gui
-          ../zuo/zuo . x86_64-win32 gui
+          # make all the targets
+          ./zuo/zuo . x86_64-linux gui
+          ./zuo/zuo . aarch64-macosx gui
+          ./zuo/zuo . x86_64-macosx gui
+          ./zuo/zuo . x86_64-win32 gui
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
