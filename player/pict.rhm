@@ -82,7 +82,7 @@ fun shop_pict(vs :: ViewState) :~ Pict:
         cond
         | vs.s.shop[c] == 0:
             // would write cp.alpha(0.3), but work around a Cairo bug in PDF generation
-            overlay(cp, rectangle(~width: cp, ~height: cp, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
+            overlay(cp, rectangle(~width: cp.width, ~height: cp.height, ~line: #false, ~fill: pict.Color("white") with (alpha = 0.7)))
         | ~else: cp
       let p:
         stack(cp,
