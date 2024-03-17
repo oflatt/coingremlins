@@ -44,9 +44,9 @@ jobs:
           cd ..
       - name: "Install raco cross"
         run: raco pkg install --auto -D raco-cross
-      - name: "Install rhombus"
+      #- name: "Install rhombus"
         # pass -D to avoid building docs
-        run: raco pkg install --auto -D rhombus-prototype
+        #run: raco pkg install --auto -D rhombus-prototype
       - name: Install Font
         run: |
           wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
@@ -62,6 +62,9 @@ jobs:
       - name: "Build Binaries"
         run: |
           cd player
+          pwd
+          ls ..
+          ls ../zuo
           mkdir compiled
           ../zuo/zuo . x86_64-linux gui
           ../zuo/zuo . aarch64-macosx gui

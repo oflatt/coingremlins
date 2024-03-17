@@ -18,11 +18,13 @@ let s = income(s)
 let s = start_investing(s)
 let content = gui.Obs(#false)
 let graphic = gui.Obs(#false)
+let server = "thistle.cs.utah.edu"
+let port = 5555
 
 match rkt_base.#{current-command-line-arguments}()
 | Array(): #void
-| Array(server, port, id, players, player_index):
-    let (i, o): rkt_tcp.#{tcp-connect}(server, String.to_int(port))
+| Array(id, players, player_index):
+    let (i, o): rkt_tcp.#{tcp-connect}(server, port)
     println(id, o)
     println(players, o)
     println(player_index, o)
