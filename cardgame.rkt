@@ -88,7 +88,7 @@
 
 
 (dcard pass-card  #f  "Pass"       -1 -1 -1 1 "Player chose not to buy a card" "" (list reference-tag not-in-shop-tag every-game-tag))
-(dcard stipend    #f   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these." (list not-in-shop-tag every-game-tag))
+(dcard stipend    "stipend.png"   "Sorcerer's Stipend"       -1 -1 -1 1 "Every day: +1 coin\nDay 1: +1 coin" "Each player starts with one of these and 1 coin." (list not-in-shop-tag every-game-tag))
 (dcard day-tracker #f "Day Tracker" -1 -1 -1 0 "" "Day 1\n\n\nDay 2\n\n\nDay 3"  (list day-tracker-tag not-in-shop-tag every-game-tag))
 (dcard pepper      "monopoly.png"   "Board of Monopoly"      2 1 1 2 "Worth 1 victory point" "" (list victory-tag every-game-tag))
 (dcard pearl      "incantation.png"   "Incantation"   4 1 1 3 "Worth 3 victory points"  "" (list victory-tag every-game-tag))
@@ -97,11 +97,11 @@
 
 ;; ################### BASE GAME ###############################
 (dcard stone-wall  "goldwall.png" "Wall of Wealth"    1  1  2 2 "Day 1: +1 coin" "Can defend twice per turn (unless the first makes it faint)" (list base-game-tag))
-(dcard poison    "ghost.png"   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" (list base-game-tag))
-(dcard farmer    "worker.png"   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" (list base-game-tag))
-(dcard bomb-spirit "bubble.png" "Bubble"        2  9  2 1 "" "Cannot attack" (list base-game-tag))
+(dcard poison      "ghost.png"   "Ghost"         2  3  2 2 "Day 3: +1 coin" "" (list base-game-tag))
+(dcard farmer      "worker.png"   "Worker"        1  1  2 2 "Day 2: +1 coin\nDay 3: +1 coin" "" (list base-game-tag))
+(dcard bomb-spirit "bubble.png" "Bubble"        2  5  2 1 "" "Cannot attack" (list base-game-tag))
 (dcard buff-farmer "senior-worker.png" "Senior Worker"   2  2  2 2 "Every day: +1 coin" "" (list base-game-tag))
-(dcard glass    "goldfish.png"   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" "" (list base-game-tag))
+(dcard glass       "goldfish.png"   "Gold Fish"           3  1  2 1 "Day 3: +4 coin" "" (list base-game-tag))
 (dcard merchant   #f  "Apprentice"      3  2  1 1 "Day 1: +1 coin\nDay 2: +1 coin\nDay 3: +1 buy" "" (list base-game-tag))
 (dcard thief    #f    "Thug"         3  4  4 1 "Day 2: +1 coin" "" (list base-game-tag))
 (dcard armadillo  #f  "Shield of Greed"  4  2  7 1 "" "When this card defends: +1 coin (even if it loses)" (list base-game-tag))
@@ -110,13 +110,13 @@
 
 
 ;; ################  BOOSTER 1 ##################################
-(dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than the other:\n        +3 coin" "" (list booster1-tag))
-(dcard lizard    "lizard.png"   "Aggressive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when attacking other players." (list booster1-tag))
+(dcard underdog   #f  "Underdog"      4  2  2 1 "Every day:\n    If owner has fewer cards than every other player:\n        +3 coin" "" (list booster1-tag))
+(dcard lizard    "lizard.png"   "Aggressive Lizard" 3  2  2 1 "" "Attack phase: gain 2 coins when this card attacks" (list booster1-tag))
 (dcard coin-gremlin #f "Coin Gremlin"  3  1  1 1 "" "Has +1 to hp and attack for each coin the owner has." (list booster1-tag))
-(dcard gold-mine   #f   "Gold mine"    3  2  2 1 "" "Day 2: +1 coin for each card to the right of this card." (list booster1-tag))
-(dcard loan    #f     "Loan"          0  1  1 1 "On buy: +7 coins\nEvery day: -2 coin after the buy phase." "" (list booster1-tag))
-(dcard moppet    #f   "BuffFarmer2"    4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
-(dcard spirit   #f   "Spirit"        2  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
+(dcard gold-mine   #f  "Gold Mine"    3  2  2 1 "" "Day 3: +1 coin\nDay 1: +1 coin for each card to the right of this card." (list booster1-tag))
+(dcard loan    #f     "Loan"          0  1  1 1  "On buy: +7 coins\nEvery day: -2 coins after the income phase." "" (list booster1-tag))
+(dcard moppet    #f   "Buff Farmer"    4  4  2 1 "" "Cannot be blocked by cards with less than 4 attack." (list booster1-tag))
+(dcard spirit   #f   "Hungry Hippo"        2  2  2 1 "Income phase: optionally add 1 coin to this card" "+1 defense and +1 attack for each coin on this card" (list booster1-tag))
 
 
 ;; ##################### BOOSTER 2 ###############################
@@ -124,7 +124,8 @@
 (dcard white-flag #f  "White Flag"    3  1  3 1 "" "Attack phase: Bid this card instead of coins. Gain all marbles opponent bid, and discard this card." (list booster2-tag))
 (dcard bunny   #f     "Bunny"         2  3  3 1 "" "3rd income phase after bought:\nGain a bunny twin from the shop." (list booster2-tag))
 (dcard bunny-twin  #f  "Bunny Twin"    2  3  3 1 "" "Cannot be bought." (list booster2-tag))
-(dcard valhalla   #f  "Valhalla"      4  2  9 1 "" "Cannot defend\nWhen this player attacks, if the attacker dies, +2 coin for owner" (list booster2-tag))
+(dcard valhalla   #f  "Valhalla"       4  2  3 1 "" "Day 1: +1 coin\nWhen this player attacks and the attacking card feints, gain a goul" (list booster2-tag))
+(dcard goul       #f   "Goul"          0  1  1 2 "" "Cannot be bought\nThis card comes in to play already tapped (can't attack this round)" (list booster2-tag))
 
 ;; card name ideas
 ;; vertical incantation/integration
