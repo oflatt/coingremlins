@@ -41,8 +41,9 @@ jobs:
           cd zuo
           ./configure
           make
-          make install
           cd ..
+      - name: "Install raco cross"
+        run: raco pkg install --auto raco-cross
       - name: "Install rhombus"
         run: raco pkg install --auto rhombus-prototype
       - name: Install Font
@@ -57,6 +58,11 @@ jobs:
         with:
           run: make
 
+      - name: "Build for Mac (Arm)"
+        run: |
+          cd player
+          mkdir compiled
+          ../zuo/zuo . aarch64-macosx gui
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
