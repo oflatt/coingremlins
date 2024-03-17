@@ -94,7 +94,7 @@ fun make_game(number_of_players :: Int,
     for Map (c: (if simple | simple_shop_cards | all_shop_cards) :~ List.of(Card)):
       values(c, c.per_player * number_of_players),
     for List (i: 0..number_of_players):
-      Player(0, 0, [BoughtCard(stipend)]),
+      Player(1, 0, [BoughtCard(stipend)]),
     data
   )
 

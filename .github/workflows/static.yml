@@ -35,6 +35,21 @@ jobs:
         uses: Bogdanp/setup-racket@v1.9
         with:
           version: "8.10"
+      - name: "Install rhombus"
+        with:
+          run: raco pkg install rhombus-prototype
+      - name: "Install Zuo"
+        with:
+          run: |
+            git clone git@github.com:racket/zuo
+            cd zuo
+            ./configure
+            make
+            make install
+            cd ..
+      - name: "Install raco cross"
+        with:
+          run: raco pkg install --auto raco-cross
       - name: Install Font
         run: |
           wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
@@ -46,6 +61,14 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           run: make
+
+      - name: "Build for Linux"
+        with:
+          run: |
+            cd player
+            mkdir compiled
+            zuo . aarch64-macosx
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
