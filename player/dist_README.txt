@@ -21,4 +21,9 @@ This distribution contains the following executables:
  * `play_random` and `play_decent` - Player programs.
 
  * `play_gui` - A player program that starts a GUI so that a human can
-     enter moves.
+     enter moves. You can also use this GUI to connect to a server
+     with `play_gui <host> <port> <game_id> <player_count> <my_index>`.
+     The <host> and <port> arguments select a server. The <game_id>
+     plus <player_count> arguments together select a game that
+     multiple players can join. Each player should choose a unique
+     <index> between 0 (inclusive) and <player_count> (exclusive).

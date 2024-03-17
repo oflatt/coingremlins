@@ -16,6 +16,8 @@
     '("never" "wrong" "random" "simple" "points" "attack" "decent" "gui"))
   (define dist-exes
     '("game" "tournament" "slide" "play_random" "play_decent" "play_gui"))
+  (define dist-gui-exes
+    '("play_gui"))
 
   (define exes
     (map (lambda (s) (~a "play_" s))
@@ -59,7 +61,7 @@
                   "-o" (build-path dir exe)
                   (~a exe ".rhm"))))
 
-  (define (cross-dist target)    
+  (define (cross-dist target dist-exes dist_README.txt)
     (define name (~a "economancy-" target))
     (define win? (member target win-targets))
     (define name.tgz (~a name (if win? ".zip" ".tgz")))
@@ -74,7 +76,7 @@
                                                          (~a exe ".exe")
                                                          exe)))
                      dist-exes))
-    (cp "dist_README.txt" (build-path dir "README.txt"))
+    (cp dist_README.txt (build-path dir "README.txt"))
     (shell/wait (if win?
                     "zip -r"
                     "tar zcf")
@@ -95,9 +97,16 @@
      ,@(map (lambda (target-machine)
               (define sym (string->symbol target-machine))
               `[:target ,sym (,(setup-name target-machine))
-                        ,(lambda (token)
-                           (for-each (cross-exe target-machine) dist-exes)
-                           (cross-dist target-machine))])
+                        ,(lambda (token [mode "all"])
+                           (let ([dist-exes (if (equal? mode "gui")
+                                                dist-gui-exes
+                                                dist-exes)]
+                                 [dist_README.txt (if (equal? mode "gui")
+                                                      "dist_gui_README.txt"
+                                                      "dist_README.txt")])
+                             (for-each (cross-exe target-machine) dist-exes)
+                             (cross-dist target-machine dist-exes dist_README.txt)))
+                        :command])
             target-machines)
 
      ,@(map (lambda (target)
