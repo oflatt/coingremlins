@@ -1,0 +1,28 @@
+name: 'Setup'
+description: 'Setup racket and rhombus'
+inputs:
+outputs:
+
+
+runs:
+  using: "composite"
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: "Install Racket"
+      uses: Bogdanp/setup-racket@v1.9
+      with:
+        version: "8.10"
+    - name: "Install raco cross"
+      run: raco pkg install --auto -D raco-cross
+    - name: Install Font
+      run: |
+        wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
+        unzip -d pt_sans/ PT_Sans.zip
+        mv pt_sans /usr/share/fonts/
+        fc-cache -fv
+    - uses: actions/checkout@master
+    - name: Install rhombus
+      # pass -D to avoid building docs
+      run: raco pkg install --auto -D rhombus-prototype

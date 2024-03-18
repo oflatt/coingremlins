@@ -1,0 +1,45 @@
+name: Test and Build Webpage
+
+on:
+  push:
+    tags:
+      - v*
+
+
+jobs:
+  release:
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: "release"
+      cancel-in-progress: false
+    name: Release binaries if tagged
+    steps:
+      - name: setup
+        uses: actions/setup.yml@v1
+      - name: Build Release Binaries
+        run: |
+          cd player
+          git clone https://github.com/racket/zuo.git
+          # install zuo in a sub-folder
+          cd zuo
+          ./configure
+          make
+          cd ..
+          # make compiled folder so zuo doesn't complain
+          mkdir compiled
+          # make all the targets
+          ./zuo/zuo . x86_64-linux gui
+          ./zuo/zuo . aarch64-macosx gui
+          ./zuo/zuo . x86_64-macosx gui
+          ./zuo/zuo . x86_64-win32 gui
+          ls ./compiled
+          cd ..
+      - name: Release Binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            player/compiled/economancy-x86_64-linux.tgz
+            player/compiled/economancy-aarch64-macosx.tgz
+            player/compiled/economancy-x86_64-macosx.tgz
+            player/compiled/economancy-x86_64-win32.zip
