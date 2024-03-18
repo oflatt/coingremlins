@@ -15,6 +15,8 @@ jobs:
       cancel-in-progress: false
     name: Release binaries if tagged
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup.yml
       - name: Build Release Binaries
