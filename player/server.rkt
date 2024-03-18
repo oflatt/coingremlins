@@ -32,6 +32,7 @@
             (define-values (end-s players)
               (drive_game
                n
+               #:simple #f
                #:data (hasheqv)
                (lambda (s player-index players)
                  (define map (hash-set (state_to_map s) 'player player-index))
