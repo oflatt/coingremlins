@@ -1,5 +1,5 @@
 name: 'Setup'
-description: 'Setup racket and rhombus'
+description: 'Setup racket and othe dependencies'
 
 runs:
   using: "composite"
@@ -15,7 +15,3 @@ runs:
         unzip -d pt_sans/ PT_Sans.zip
         mv pt_sans /usr/share/fonts/
         fc-cache -fv
-    - name: Install rhombus
-      shell: bash
-      # pass -D to avoid building docs
-      run: raco pkg install --auto -D rhombus-prototype
