@@ -1,8 +1,5 @@
 name: 'Setup'
 description: 'Setup racket and rhombus'
-inputs:
-
-outputs:
 
 
 runs:
