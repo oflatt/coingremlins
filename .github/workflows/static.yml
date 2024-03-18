@@ -29,7 +29,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/actions/setup
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Deploy to GitHub Pages

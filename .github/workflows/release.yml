@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/actions/setup
       - name: Build Release Binaries
         run: |
           cd player
