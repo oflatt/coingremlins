@@ -37,9 +37,6 @@ jobs:
           version: "8.10"
       - name: "Install raco cross"
         run: raco pkg install --auto -D raco-cross
-      #- name: "Install rhombus"
-        # pass -D to avoid building docs
-        #run: raco pkg install --auto -D rhombus-prototype
       - name: Install Font
         run: |
           wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
@@ -51,8 +48,11 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           run: make
-
-      - name: "Build Binaries"
+      - name: "Install rhombus"
+        # pass -D to avoid building docs
+        run: raco pkg install --auto -D rhombus-prototype
+      - name: "Build Release Binaries"
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd player
           git clone https://github.com/racket/zuo.git
@@ -68,6 +68,18 @@ jobs:
           ./zuo/zuo . aarch64-macosx gui
           ./zuo/zuo . x86_64-macosx gui
           ./zuo/zuo . x86_64-win32 gui
+          ls ./compiled
+          cd ..
+      - name: Release Binaries
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            player/compiled/economancy-x86_64-linux.tgz
+            player/compiled/economancy-aarch64-macosx.tgz
+            player/compiled/economancy-x86_64-macosx.tgz
+            player/compiled/economancy-x86_64-win32.zip
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
