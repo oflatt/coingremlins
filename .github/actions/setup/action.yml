@@ -10,8 +10,10 @@ runs:
       with:
         version: "8.10"
     - name: "Install raco cross"
+      shell: bash
       run: raco pkg install --auto -D raco-cross
     - name: Install Font
+      shell: bash
       run: |
         wget -O PT_Sans.zip https://fonts.google.com/download?family=PT%20Sans
         unzip -d pt_sans/ PT_Sans.zip
@@ -19,5 +21,6 @@ runs:
         fc-cache -fv
     - uses: actions/checkout@master
     - name: Install rhombus
+      shell: bash
       # pass -D to avoid building docs
       run: raco pkg install --auto -D rhombus-prototype
