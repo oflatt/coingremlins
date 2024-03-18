@@ -6,7 +6,6 @@ outputs:
 
 runs:
   using: "composite"
-  runs-on: ubuntu-latest
   steps:
     - name: "Install Racket"
       uses: Bogdanp/setup-racket@v1.9
