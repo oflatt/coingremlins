@@ -11,15 +11,8 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
+  setup:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -40,15 +33,33 @@ jobs:
           mv pt_sans /usr/share/fonts/
           fc-cache -fv
       - uses: actions/checkout@master
-      - name: "Run makefile"
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: make
       - name: Install rhombus
         # pass -D to avoid building docs
         run: raco pkg install --auto -D rhombus-prototype
-      - name: Build Release Binaries if tagged
-        if: startsWith(github.ref, 'refs/tags/')
+  generate:
+    name: Run tests and generate website
+    needs: setup
+    steps:
+      - name: "Run makefile"
+          uses: coactions/setup-xvfb@v1
+          with:
+            run: make
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs-artifact
+          path: docs
+
+  release:
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: "release"
+      cancel-in-progress: false
+    name: Release binaries if tagged
+    needs: generate
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Build Release Binaries
         run: |
           cd player
           git clone https://github.com/racket/zuo.git
@@ -66,29 +77,29 @@ jobs:
           ./zuo/zuo . x86_64-win32 gui
           ls ./compiled
           cd ..
-      - name: Release Binaries if tagged
+      - name: Release Binaries
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             player/compiled/economancy-x86_64-linux.tgz
             player/compiled/economancy-aarch64-macosx.tgz
             player/compiled/economancy-x86_64-macosx.tgz
             player/compiled/economancy-x86_64-win32.zip
-
+  pages:
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    name: Deploy to GitHub Pages on Main
+    needs: generate
+    if: github.ref == 'refs/heads/master'
+    steps:
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload entire repository
-          path: './docs'
-      - name: Deploy to GitHub Pages if on Master
+      - name: Deploy to GitHub Pages if on Main
         id: deployment
         uses: actions/deploy-pages@v4
         if: github.ref == 'refs/heads/master'
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: docs-artifact
-          path: docs
+      
