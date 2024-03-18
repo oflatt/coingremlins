@@ -22,7 +22,8 @@ jobs:
         uses: ./.github/actions/setup
       - name: Make game
         uses: coactions/setup-xvfb@v1
-        run: make
+        with:
+          run: make
       - name: "Install raco cross"
         shell: bash
         run: raco pkg install --auto -D raco-cross
