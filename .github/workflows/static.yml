@@ -41,9 +41,9 @@ jobs:
     needs: setup
     steps:
       - name: "Run makefile"
-          uses: coactions/setup-xvfb@v1
-          with:
-            run: make
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: make
       - uses: actions/upload-artifact@v4
         with:
           name: docs-artifact
