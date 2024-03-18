@@ -27,7 +27,7 @@ jobs:
     name: Deploy to GitHub Pages
     steps:
       - name: Setup
-        uses: actions/setup.yml@v1
+        uses: ./.github/actions/setup.yml
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Deploy to GitHub Pages

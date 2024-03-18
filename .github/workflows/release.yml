@@ -15,8 +15,8 @@ jobs:
       cancel-in-progress: false
     name: Release binaries if tagged
     steps:
-      - name: setup
-        uses: actions/setup.yml@v1
+      - name: Setup
+        uses: ./.github/actions/setup.yml
       - name: Build Release Binaries
         run: |
           cd player
