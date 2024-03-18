@@ -14,6 +14,7 @@ jobs:
       group: "release"
       cancel-in-progress: false
     name: Release binaries if tagged
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
