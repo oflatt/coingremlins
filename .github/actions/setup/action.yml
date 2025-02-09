@@ -8,3 +8,11 @@ runs:
       uses: Bogdanp/setup-racket@v1.9
       with:
         version: "8.10"
+    - name: Install Font Installer
+      shell: bash
+      run: |
+        npm install -g google-font-installer
+    - name: Install Font
+      shell: bash
+      run: |
+        gfi install "PT Sans"
